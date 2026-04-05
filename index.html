@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ספירת העומר</title>
+    <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            background: #0a0a1a;
+            font-family: 'Frank Ruhl Libre', serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Stars */
+        .stars {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle var(--dur, 3s) ease-in-out infinite;
+            animation-delay: var(--delay, 0s);
+            opacity: 0;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0; transform: scale(0.8); }
+            50% { opacity: var(--max-opacity, 0.8); transform: scale(1.2); }
+        }
+
+        /* Floating particles (like sparks/embers) */
+        .particles {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .particle {
+            position: absolute;
+            width: 3px; height: 3px;
+            background: #f4c430;
+            border-radius: 50%;
+            animation: float var(--dur, 8s) ease-in-out infinite;
+            animation-delay: var(--delay, 0s);
+            opacity: 0;
+            bottom: -10px;
+            left: var(--left, 50%);
+        }
+        @keyframes float {
+            0% { opacity: 0; transform: translateY(0) scale(1); }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.4; }
+            100% { opacity: 0; transform: translateY(-100vh) scale(0.3) rotate(360deg); }
+        }
+
+        /* Moon */
+        .moon {
+            position: fixed;
+            top: 60px; left: 80px;
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #fffde7, #f4c430, #e6a800);
+            box-shadow: 0 0 40px 15px rgba(244, 196, 48, 0.3), 0 0 80px 30px rgba(244, 196, 48, 0.1);
+            animation: moonGlow 4s ease-in-out infinite;
+            z-index: 1;
+        }
+        @keyframes moonGlow {
+            0%, 100% { box-shadow: 0 0 40px 15px rgba(244, 196, 48, 0.3), 0 0 80px 30px rgba(244, 196, 48, 0.1); }
+            50% { box-shadow: 0 0 60px 25px rgba(244, 196, 48, 0.5), 0 0 100px 50px rgba(244, 196, 48, 0.2); }
+        }
+
+        /* Main card */
+        .container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 680px;
+            padding: 20px;
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(15,15,40,0.95) 0%, rgba(10,10,25,0.98) 100%);
+            border: 1px solid rgba(244, 196, 48, 0.3);
+            border-radius: 24px;
+            padding: 50px 40px;
+            text-align: center;
+            box-shadow: 0 0 60px rgba(244, 196, 48, 0.1), 0 30px 60px rgba(0,0,0,0.5);
+            animation: cardFloat 6s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(244, 196, 48, 0.6), transparent);
+        }
+
+        @keyframes cardFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* Header */
+        .header-title {
+            font-size: 14px;
+            letter-spacing: 4px;
+            color: rgba(244, 196, 48, 0.7);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        /* Sefirah badge */
+        .sefirah-badge {
+            display: inline-block;
+            background: rgba(244, 196, 48, 0.1);
+            border: 1px solid rgba(244, 196, 48, 0.3);
+            border-radius: 20px;
+            padding: 6px 18px;
+            font-size: 13px;
+            color: #f4c430;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+        }
+
+        /* Day number */
+        .day-number {
+            font-size: clamp(90px, 20vw, 140px);
+            font-weight: 900;
+            line-height: 1;
+            background: linear-gradient(180deg, #fffde7 0%, #f4c430 50%, #c8860a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            animation: numPulse 4s ease-in-out infinite;
+            display: block;
+        }
+
+        @keyframes numPulse {
+            0%, 100% { filter: drop-shadow(0 0 20px rgba(244, 196, 48, 0.4)); }
+            50% { filter: drop-shadow(0 0 40px rgba(244, 196, 48, 0.8)); }
+        }
+
+        /* Omer formula text */
+        .omer-text {
+            font-size: clamp(18px, 4vw, 26px);
+            font-weight: 500;
+            color: #fffde7;
+            line-height: 1.7;
+            margin-bottom: 8px;
+            direction: rtl;
+        }
+
+        .omer-text .weeks-part {
+            font-size: 0.8em;
+            color: rgba(244, 196, 48, 0.8);
+        }
+
+        /* Divider */
+        .divider {
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #f4c430, transparent);
+            margin: 28px auto;
+        }
+
+        /* Torah thought */
+        .torah-section {
+            background: rgba(244, 196, 48, 0.05);
+            border-radius: 16px;
+            padding: 24px 20px;
+            border: 1px solid rgba(244, 196, 48, 0.12);
+        }
+
+        .torah-label {
+            font-size: 12px;
+            letter-spacing: 3px;
+            color: rgba(244, 196, 48, 0.6);
+            margin-bottom: 14px;
+            text-transform: uppercase;
+        }
+
+        .torah-quote {
+            font-size: clamp(16px, 3.5vw, 20px);
+            font-weight: 400;
+            color: #fffde7;
+            line-height: 1.8;
+            margin-bottom: 12px;
+            direction: rtl;
+        }
+
+        .torah-quote::before {
+            content: '"';
+            color: #f4c430;
+            font-size: 1.4em;
+            font-weight: 900;
+        }
+        .torah-quote::after {
+            content: '"';
+            color: #f4c430;
+            font-size: 1.4em;
+            font-weight: 900;
+        }
+
+        .torah-source {
+            font-size: 14px;
+            color: rgba(244, 196, 48, 0.7);
+            font-style: italic;
+        }
+
+        /* Date display */
+        .date-display {
+            margin-top: 28px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.3);
+            letter-spacing: 1px;
+        }
+
+        /* Before/after omer messages */
+        .message-card {
+            font-size: clamp(22px, 5vw, 32px);
+            color: #fffde7;
+            line-height: 1.6;
+        }
+        .message-sub {
+            font-size: 16px;
+            color: rgba(244, 196, 48, 0.7);
+            margin-top: 12px;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .card { padding: 36px 24px; }
+            .moon { width: 50px; height: 50px; top: 30px; left: 30px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="moon"></div>
+
+<div class="stars" id="stars"></div>
+<div class="particles" id="particles"></div>
+
+<div class="container">
+    <div class="card" id="main-card">
+        <div id="content">
+            <p style="color: #f4c430; font-size: 18px;">טוען...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+// ===== OMER DATA =====
+// Omer Day 1 = April 14, 2026
+const OMER_START = new Date(2026, 3, 14); // Month is 0-indexed, so 3 = April
+
+const hebrewNumbers = ['', 'אֶחָד', 'שְׁנַיִם', 'שְׁלשָׁה', 'אַרְבָּעָה', 'חֲמִשָּׁה', 'שִׁשָּׁה',
+    'שִׁבְעָה', 'שְׁמוֹנָה', 'תִּשְׁעָה', 'עֲשָׂרָה', 'אַחַד עָשָׂר', 'שְׁנֵים עָשָׂר',
+    'שְׁלשָׁה עָשָׂר', 'אַרְבָּעָה עָשָׂר', 'חֲמִשָּׁה עָשָׂר', 'שִׁשָּׁה עָשָׂר',
+    'שִׁבְעָה עָשָׂר', 'שְׁמוֹנָה עָשָׂר', 'תִּשְׁעָה עָשָׂר', 'עֶשְׂרִים',
+    'אֶחָד וְעֶשְׂרִים', 'שְׁנַיִם וְעֶשְׂרִים', 'שְׁלשָׁה וְעֶשְׂרִים',
+    'אַרְבָּעָה וְעֶשְׂרִים', 'חֲמִשָּׁה וְעֶשְׂרִים', 'שִׁשָּׁה וְעֶשְׂרִים',
+    'שִׁבְעָה וְעֶשְׂרִים', 'שְׁמוֹנָה וְעֶשְׂרִים', 'תִּשְׁעָה וְעֶשְׂרִים',
+    'שְׁלשִׁים', 'אֶחָד וּשְׁלשִׁים', 'שְׁנַיִם וּשְׁלשִׁים', 'שְׁלשָׁה וּשְׁלשִׁים',
+    'אַרְבָּעָה וּשְׁלשִׁים', 'חֲמִשָּׁה וּשְׁלשִׁים', 'שִׁשָּׁה וּשְׁלשִׁים',
+    'שִׁבְעָה וּשְׁלשִׁים', 'שְׁמוֹנָה וּשְׁלשִׁים', 'תִּשְׁעָה וּשְׁלשִׁים',
+    'אַרְבָּעִים', 'אֶחָד וְאַרְבָּעִים', 'שְׁנַיִם וְאַרְבָּעִים', 'שְׁלשָׁה וְאַרְבָּעִים',
+    'אַרְבָּעָה וְאַרְבָּעִים', 'חֲמִשָּׁה וְאַרְבָּעִים', 'שִׁשָּׁה וְאַרְבָּעִים',
+    'שִׁבְעָה וְאַרְבָּעִים', 'שְׁמוֹנָה וְאַרְבָּעִים', 'תִּשְׁעָה וְאַרְבָּעִים'];
+
+const weekNames = ['', 'שָׁבוּעַ אֶחָד', 'שְׁנֵי שָׁבוּעוֹת', 'שְׁלשָׁה שָׁבוּעוֹת',
+    'אַרְבָּעָה שָׁבוּעוֹת', 'חֲמִשָּׁה שָׁבוּעוֹת', 'שִׁשָּׁה שָׁבוּעוֹת', 'שִׁבְעָה שָׁבוּעוֹת'];
+
+const sefirot = [
+    '', // placeholder
+    // Week 1 - Chesed
+    'חֶסֶד שֶׁבְּחֶסֶד', 'גְּבוּרָה שֶׁבְּחֶסֶד', 'תִּפְאֶרֶת שֶׁבְּחֶסֶד',
+    'נֶצַח שֶׁבְּחֶסֶד', 'הוֹד שֶׁבְּחֶסֶד', 'יְסוֹד שֶׁבְּחֶסֶד', 'מַלְכוּת שֶׁבְּחֶסֶד',
+    // Week 2 - Gevurah
+    'חֶסֶד שֶׁבִּגְבוּרָה', 'גְּבוּרָה שֶׁבִּגְבוּרָה', 'תִּפְאֶרֶת שֶׁבִּגְבוּרָה',
+    'נֶצַח שֶׁבִּגְבוּרָה', 'הוֹד שֶׁבִּגְבוּרָה', 'יְסוֹד שֶׁבִּגְבוּרָה', 'מַלְכוּת שֶׁבִּגְבוּרָה',
+    // Week 3 - Tiferet
+    'חֶסֶד שֶׁבְּתִּפְאֶרֶת', 'גְּבוּרָה שֶׁבְּתִּפְאֶרֶת', 'תִּפְאֶרֶת שֶׁבְּתִּפְאֶרֶת',
+    'נֶצַח שֶׁבְּתִּפְאֶרֶת', 'הוֹד שֶׁבְּתִּפְאֶרֶת', 'יְסוֹד שֶׁבְּתִּפְאֶרֶת', 'מַלְכוּת שֶׁבְּתִּפְאֶרֶת',
+    // Week 4 - Netzach
+    'חֶסֶד שֶׁבְּנֶצַח', 'גְּבוּרָה שֶׁבְּנֶצַח', 'תִּפְאֶרֶת שֶׁבְּנֶצַח',
+    'נֶצַח שֶׁבְּנֶצַח', 'הוֹד שֶׁבְּנֶצַח', 'יְסוֹד שֶׁבְּנֶצַח', 'מַלְכוּת שֶׁבְּנֶצַח',
+    // Week 5 - Hod
+    'חֶסֶד שֶׁבְּהוֹד', 'גְּבוּרָה שֶׁבְּהוֹד', 'תִּפְאֶרֶת שֶׁבְּהוֹד',
+    'נֶצַח שֶׁבְּהוֹד', 'הוֹד שֶׁבְּהוֹד', 'יְסוֹד שֶׁבְּהוֹד', 'מַלְכוּת שֶׁבְּהוֹד',
+    // Week 6 - Yesod
+    'חֶסֶד שֶׁבִּיסוֹד', 'גְּבוּרָה שֶׁבִּיסוֹד', 'תִּפְאֶרֶת שֶׁבִּיסוֹד',
+    'נֶצַח שֶׁבִּיסוֹד', 'הוֹד שֶׁבִּיסוֹד', 'יְסוֹד שֶׁבִּיסוֹד', 'מַלְכוּת שֶׁבִּיסוֹד',
+    // Week 7 - Malchut
+    'חֶסֶד שֶׁבְּמַלְכוּת', 'גְּבוּרָה שֶׁבְּמַלְכוּת', 'תִּפְאֶרֶת שֶׁבְּמַלְכוּת',
+    'נֶצַח שֶׁבְּמַלְכוּת', 'הוֹד שֶׁבְּמַלְכוּת', 'יְסוֹד שֶׁבְּמַלְכוּת', 'מַלְכוּת שֶׁבְּמַלְכוּת'
+];
+
+// Torah thoughts - authentic quotes for each day
+const torahThoughts = [
+    null, // placeholder
+    // Day 1
+    { q: 'עוֹלָם חֶסֶד יִבָּנֶה', s: 'תהילים פט, ג', t: 'The world is built upon loving-kindness' },
+    // Day 2
+    { q: 'אֵיזוֹ הִיא אַהֲבָה שֶׁאֵינָהּ תְּלוּיָה בְּדָבָר? זוֹ אַהֲבַת דָּוִד וִיהוֹנָתָן', s: 'פרקי אבות ה, טז', t: '' },
+    // Day 3
+    { q: 'הֱוֵי מְקַבֵּל כָּל הָאָדָם בְּסֵבֶר פָּנִים יָפוֹת', s: 'שמאי, פרקי אבות א, טו', t: 'Receive every person with a pleasant countenance' },
+    // Day 4
+    { q: 'כָּל מִי שֶׁיֵּשׁ בּוֹ שְׁלשָׁה דְבָרִים הַלָּלוּ הוּא מִתַּלְמִידָיו שֶׁל אַבְרָהָם אָבִינוּ: עַיִן טוֹבָה, וְרוּחַ נְמוּכָה, וְנֶפֶשׁ שְׁפָלָה', s: 'פרקי אבות ה, יט', t: '' },
+    // Day 5
+    { q: 'גְּמִילוּת חֲסָדִים שְׁקוּלָה כְּנֶגֶד כָּל הַמִּצְווֹת כֻּלָּן', s: 'תלמוד ירושלמי, פאה א, א', t: 'Acts of loving-kindness outweigh all other commandments' },
+    // Day 6
+    { q: 'עַל שְׁלשָׁה דְבָרִים הָעוֹלָם עוֹמֵד: עַל הַתּוֹרָה וְעַל הָעֲבוֹדָה וְעַל גְּמִילוּת חֲסָדִים', s: 'שמעון הצדיק, פרקי אבות א, ב', t: '' },
+    // Day 7
+    { q: 'כִּי טוֹב לְהוֹדוֹת לַה\' וּלְזַמֵּר לְשִׁמְךָ עֶלְיוֹן', s: 'תהילים צב, ב', t: 'It is good to give thanks to God, and to sing to Your name on high' },
+    // Day 8
+    { q: 'אֵיזֶהוּ גִבּוֹר? הַכּוֹבֵשׁ אֶת יִצְרוֹ', s: 'בן זומא, פרקי אבות ד, א', t: 'Who is mighty? One who conquers his own impulse' },
+    // Day 9
+    { q: 'לְעוֹלָם יִהְיֶה אָדָם רַךְ כַּקָּנֶה וְאַל יְהֵא קָשֶׁה כָּאֶרֶז', s: 'תלמוד בבלי, תענית כ, ב', t: 'Always be flexible like a reed, and not rigid like a cedar' },
+    // Day 10
+    { q: 'בִּמְקוֹם שֶׁבַּעֲלֵי תְשׁוּבָה עוֹמְדִין, אֵין צַדִּיקִים גְּמוּרִים יְכוֹלִין לַעֲמוֹד', s: 'תלמוד בבלי, ברכות לד, ב', t: 'Where penitents stand, the perfectly righteous cannot stand' },
+    // Day 11
+    { q: 'כָּל כָּבוֹד בַּת מֶלֶךְ פְּנִימָה', s: 'תהילים מה, יד', t: 'All the glory of the king\'s daughter is within' },
+    // Day 12
+    { q: 'אֵיזֶהוּ עָשִׁיר? הַשָּׂמֵחַ בְּחֶלְקוֹ', s: 'בן זומא, פרקי אבות ד, א', t: 'Who is rich? One who is satisfied with his portion' },
+    // Day 13
+    { q: 'לְפוּם צַעֲרָא אַגְרָא', s: 'פרקי אבות ה, כג', t: 'According to the effort is the reward' },
+    // Day 14
+    { q: 'אֵין הַבַּיְשָׁן לָמֵד וְאֵין הַקַּפְּדָן מְלַמֵּד', s: 'פרקי אבות ב, ה', t: 'The shy cannot learn, and the strict cannot teach' },
+    // Day 15
+    { q: 'כָּל יִשְׂרָאֵל עֲרֵבִים זֶה בָּזֶה', s: 'תלמוד בבלי, שבועות לט, א', t: 'All Israel are responsible for one another' },
+    // Day 16
+    { q: 'הֱוֵי מִתַּלְמִידָיו שֶׁל אַהֲרֹן, אוֹהֵב שָׁלוֹם וְרוֹדֵף שָׁלוֹם', s: 'הלל, פרקי אבות א, יב', t: 'Be among the disciples of Aaron — love peace and pursue peace' },
+    // Day 17
+    { q: 'שְׁמַע יִשְׂרָאֵל ה\' אֱלֹהֵינוּ ה\' אֶחָד', s: 'דברים ו, ד', t: 'Hear O Israel, the Lord is our God, the Lord is One' },
+    // Day 18
+    { q: 'כָּל אֶחָד וְאֶחָד חַיָּב לוֹמַר: בִּשְׁבִילִי נִבְרָא הָעוֹלָם', s: 'משנה סנהדרין ד, ה', t: 'Each person must say: the world was created for my sake' },
+    // Day 19
+    { q: 'אֲנִי לְדוֹדִי וְדוֹדִי לִי', s: 'שיר השירים ו, ג', t: 'I am my beloved\'s and my beloved is mine' },
+    // Day 20
+    { q: 'וְאָהַבְתָּ לְרֵעֲךָ כָּמוֹךָ — זֶה כְּלָל גָּדוֹל בַּתּוֹרָה', s: 'רבי עקיבא, ויקרא יט, יח', t: 'Love your neighbor as yourself — this is a great principle of the Torah' },
+    // Day 21
+    { q: 'רָאִיתִי בְּנֵי עֲלִיָּה וְהֵם מֻעָטִים, אִם אֶלֶף הֵם — אֲנִי וּבְנִי מֵהֶם', s: 'רבי שמעון בר יוחאי, סוכה מה, ב', t: '' },
+    // Day 22
+    { q: 'הֱוֵי דָן אֶת כָּל הָאָדָם לְכַף זְכוּת', s: 'יהושע בן פרחיה, פרקי אבות א, ו', t: 'Judge every person favorably' },
+    // Day 23
+    { q: 'כָּל הַמְקַיֵּם נֶפֶשׁ אַחַת מִיִּשְׂרָאֵל — מַעֲלֶה עָלָיו הַכָּתוּב כְּאִלּוּ קִיֵּם עוֹלָם מָלֵא', s: 'משנה סנהדרין ד, ה', t: 'Whoever saves a single soul — it is as if they saved an entire world' },
+    // Day 24
+    { q: 'אִם אֵין אֲנִי לִי — מִי לִי? וּכְשֶׁאֲנִי לְעַצְמִי — מָה אֲנִי? וְאִם לֹא עַכְשָׁיו — אֵימָתַי?', s: 'הלל, פרקי אבות א, יד', t: 'If I am not for myself, who will be for me? But if I am only for myself, what am I? And if not now, when?' },
+    // Day 25
+    { q: 'יָגַעְתִּי וְלֹא מָצָאתִי — אַל תַּאֲמִין. לֹא יָגַעְתִּי וּמָצָאתִי — אַל תַּאֲמִין', s: 'תלמוד בבלי, מגילה ו, ב', t: '"I toiled and did not find" — do not believe it. "I did not toil and yet found" — do not believe it' },
+    // Day 26
+    { q: 'גַּם זוּ לְטוֹבָה', s: 'רבי נחום איש גמזו, תענית כא, א', t: 'This too is for the good' },
+    // Day 27
+    { q: 'צַדִּיק בֶּאֱמוּנָתוֹ יִחְיֶה', s: 'חבקוק ב, ד', t: 'The righteous shall live by his faith' },
+    // Day 28
+    { q: 'כִּי נֵר מִצְוָה וְתוֹרָה אוֹר', s: 'משלי ו, כג', t: 'For a commandment is a lamp and the Torah is light' },
+    // Day 29
+    { q: 'חַיָּב אָדָם לְבָרֵךְ עַל הָרָעָה כְּשֵׁם שֶׁהוּא מְבָרֵךְ עַל הַטּוֹבָה', s: 'משנה ברכות ט, ה', t: 'A person must bless over the bad just as he blesses over the good' },
+    // Day 30
+    { q: 'הוֹדוּ לַה\' כִּי טוֹב, כִּי לְעוֹלָם חַסְדּוֹ', s: 'תהילים קז, א', t: 'Give thanks to God for He is good, for His kindness endures forever' },
+    // Day 31
+    { q: 'לְעוֹלָם יִרְאֶה אָדָם עַצְמוֹ כְּאִלּוּ חֶצְיוֹ חַיָּב וְחֶצְיוֹ זַכַּאי', s: 'תלמוד בבלי, קידושין מ, ב', t: 'Always see yourself as half guilty and half innocent' },
+    // Day 32 - Lag B'Omer!
+    { q: 'כָּל דִּבּוּרֵי הַתּוֹרָה — כְּגַחֲלֵי אֵשׁ! כִּי הַתּוֹרָה נִקְרֵאת "אֵשׁ דָּת"', s: 'רשב"י — רבי שמעון בר יוחאי, ספרי דברים', t: 'All words of Torah are like coals of fire! For the Torah is called "a fiery law"' },
+    // Day 33
+    { q: 'כָּל הָאוֹמֵר דָּבָר בְּשֵׁם אוֹמְרוֹ — מֵבִיא גְאֻלָּה לָעוֹלָם', s: 'פרקי אבות ו, ו', t: 'Whoever says something in the name of the one who said it brings redemption to the world' },
+    // Day 34
+    { q: 'בְּכָל דּוֹר וָדוֹר חַיָּב אָדָם לִרְאוֹת אֶת עַצְמוֹ כְּאִלּוּ הוּא יָצָא מִמִּצְרַיִם', s: 'הגדה של פסח, על פי משנה פסחים י, ה', t: 'In every generation, a person is obligated to see himself as if he personally left Egypt' },
+    // Day 35
+    { q: 'מַלְכוּת שָׁמַיִם שְׁלֵמָה אֵינָהּ מִתְגַּלָּה אֶלָּא בִּשְׂמָחָה', s: 'ספר בעל שם טוב', t: 'The complete sovereignty of Heaven is revealed only through joy' },
+    // Day 36
+    { q: 'כָּל יִשְׂרָאֵל יֵשׁ לָהֶם חֵלֶק לָעוֹלָם הַבָּא', s: 'משנה סנהדרין י, א', t: 'All Israel have a portion in the World to Come' },
+    // Day 37
+    { q: 'לֹא עָלֶיךָ הַמְּלָאכָה לִגְמוֹר, וְלֹא אַתָּה בֶּן חוֹרִין לִבָּטֵל מִמֶּנָּה', s: 'רבי טרפון, פרקי אבות ב, טז', t: 'It is not your duty to finish the work, but neither are you free to desist from it' },
+    // Day 38
+    { q: 'שָׁלוֹם שָׁלוֹם לָרָחוֹק וְלַקָּרוֹב', s: 'ישעיהו נז, יט', t: 'Peace, peace to the far and to the near' },
+    // Day 39
+    { q: 'כִּי מִצִּיּוֹן תֵּצֵא תוֹרָה וּדְבַר ה\' מִירוּשָׁלָיִם', s: 'ישעיהו ב, ג', t: 'For from Zion shall go forth the Torah, and the word of God from Jerusalem' },
+    // Day 40
+    { q: 'הֱוֵי שְׁפַל רוּחַ בִּפְנֵי כָּל אָדָם', s: 'לוויה בן עקסאי, פרקי אבות ד, י', t: 'Be of humble spirit before all people' },
+    // Day 41
+    { q: 'כָּל אֶחָד וְאֶחָד נִדּוֹן לְפִי רֹב מַעֲשָׂיו', s: 'תלמוד בבלי, קידושין מ, ב', t: 'Each person is judged according to the majority of their deeds' },
+    // Day 42
+    { q: 'טוֹב שֵׁם מִשֶּׁמֶן טוֹב', s: 'קהלת ז, א', t: 'A good name is better than precious ointment' },
+    // Day 43
+    { q: 'כָּל מָקוֹם שֶׁאַתָּה עוֹמֵד — שָׁם אַתָּה צָרִיךְ לְהַמְלִיךְ אֶת הַקָּדוֹשׁ בָּרוּךְ הוּא', s: 'בעל שם טוב', t: 'Wherever you stand — there you must crown the Holy One, Blessed be He' },
+    // Day 44
+    { q: 'לֵב טָהוֹר בְּרָא לִי אֱלֹהִים, וְרוּחַ נָכוֹן חַדֵּשׁ בְּקִרְבִּי', s: 'תהילים נא, יב', t: 'Create in me a pure heart, O God, and renew a right spirit within me' },
+    // Day 45
+    { q: 'לֹא בַשָּׁמַיִם הִיא... כִּי קָרוֹב אֵלֶיךָ הַדָּבָר מְאֹד בְּפִיךָ וּבִלְבָבְךָ לַעֲשֹׂתוֹ', s: 'דברים ל, יב–יד', t: 'It is not in heaven... for the matter is very near to you, in your mouth and in your heart, to do it' },
+    // Day 46
+    { q: 'תּוֹרָה צִוָּה לָנוּ מֹשֶׁה מוֹרָשָׁה קְהִלַּת יַעֲקֹב', s: 'דברים לג, ד', t: 'The Torah that Moses commanded us is the heritage of the congregation of Jacob' },
+    // Day 47
+    { q: 'עֲשֵׂה לְךָ רַב, וּקְנֵה לְךָ חָבֵר', s: 'יהושע בן פרחיה, פרקי אבות א, ו', t: 'Acquire a teacher for yourself, and get yourself a companion' },
+    // Day 48
+    { q: 'וְאָהַבְתָּ אֵת ה\' אֱלֹהֶיךָ בְּכָל לְבָבְךָ וּבְכָל נַפְשְׁךָ וּבְכָל מְאֹדֶךָ', s: 'דברים ו, ה', t: 'You shall love the Lord your God with all your heart, with all your soul, and with all your might' },
+    // Day 49
+    { q: 'סוֹף דָּבָר הַכֹּל נִשְׁמָע — אֶת הָאֱלֹהִים יְרָא וְאֶת מִצְווֹתָיו שְׁמוֹר, כִּי זֶה כָּל הָאָדָם', s: 'קהלת יב, יג', t: 'The end of the matter, all having been heard: fear God and keep His commandments, for this is the whole of man' }
+];
+
+function getOmerFormula(day) {
+    const weeks = Math.floor(day / 7);
+    const remainingDays = day % 7;
+
+    let dayPart = '';
+    if (day === 1) {
+        dayPart = 'יוֹם אֶחָד';
+    } else {
+        dayPart = hebrewNumbers[day] + ' יָמִים';
+    }
+
+    let weeksPart = '';
+    if (weeks > 0) {
+        weeksPart = ' שֶׁהֵם ' + weekNames[weeks];
+        if (remainingDays > 0) {
+            if (remainingDays === 1) {
+                weeksPart += ' וְיוֹם אֶחָד';
+            } else {
+                weeksPart += ' וְ' + hebrewNumbers[remainingDays] + ' יָמִים';
+            }
+        }
+    }
+
+    return { dayPart, weeksPart };
+}
+
+function getTodayOmerDay() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const start = new Date(OMER_START);
+    start.setHours(0, 0, 0, 0);
+    const diff = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+    return diff + 1; // Day 1 = first day
+}
+
+function getHebrewDate() {
+    const today = new Date();
+    return today.toLocaleDateString('he-IL', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+}
+
+function isLagBaomer(day) {
+    return day === 33;
+}
+
+function render() {
+    const day = getTodayOmerDay();
+    const content = document.getElementById('content');
+
+    if (day < 1) {
+        // Before omer
+        const daysUntil = 1 - day;
+        content.innerHTML = `
+            <p class="header-title">ספירת העומר</p>
+            <div class="message-card">
+                🌸 הספירה מתחילה בעוד ${daysUntil === 0 ? 'הלילה!' : daysUntil + ' ימים'}
+            </div>
+            <p class="message-sub">חג פסח שמח!</p>
+            <p class="date-display">${getHebrewDate()}</p>
+        `;
+        return;
+    }
+
+    if (day > 49) {
+        // After omer - Shavuot
+        content.innerHTML = `
+            <p class="header-title">✨ חג שבועות שמח! ✨</p>
+            <div class="message-card">
+                🌸 קיבלנו את התורה בשמחה! 🌸
+            </div>
+            <p class="message-sub">תורה וחיים לעם ישראל</p>
+            <p class="date-display">${getHebrewDate()}</p>
+        `;
+        return;
+    }
+
+    const { dayPart, weeksPart } = getOmerFormula(day);
+    const sefirah = sefirot[day];
+    const torah = torahThoughts[day];
+    const lagBaomer = isLagBaomer(day);
+
+    content.innerHTML = `
+        <p class="header-title">${lagBaomer ? '🔥 לג בעומר 🔥' : 'ספירת העומר'}</p>
+        <div class="sefirah-badge">${sefirah}</div>
+
+        <span class="day-number">${day}</span>
+
+        <p class="omer-text">
+            הַיּוֹם ${dayPart}
+            ${weeksPart ? `<br><span class="weeks-part">${weeksPart}</span>` : ''}
+            <br>לָעֹמֶר
+        </p>
+
+        <div class="divider"></div>
+
+        <div class="torah-section">
+            <p class="torah-label">💎 דבר תורה יומי</p>
+            <p class="torah-quote">${torah.q}</p>
+            <p class="torah-source">— ${torah.s}</p>
+            ${torah.t ? `<p style="font-size:13px; color:rgba(255,255,255,0.4); margin-top:8px; font-style:italic;">${torah.t}</p>` : ''}
+        </div>
+
+        <p class="date-display">${getHebrewDate()}</p>
+    `;
+}
+
+// ===== STARS =====
+function createStars() {
+    const container = document.getElementById('stars');
+    const count = 120;
+    for (let i = 0; i < count; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        const size = Math.random() * 2.5 + 0.5;
+        star.style.cssText = `
+            width: ${size}px;
+            height: ${size}px;
+            top: ${Math.random() * 100}%;
+            left: ${Math.random() * 100}%;
+            --dur: ${Math.random() * 4 + 2}s;
+            --delay: ${Math.random() * 6}s;
+            --max-opacity: ${Math.random() * 0.7 + 0.3};
+        `;
+        container.appendChild(star);
+    }
+}
+
+function createParticles() {
+    const container = document.getElementById('particles');
+    const count = 20;
+    for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.cssText = `
+            --left: ${Math.random() * 100}%;
+            --dur: ${Math.random() * 10 + 6}s;
+            --delay: ${Math.random() * 10}s;
+        `;
+        container.appendChild(p);
+    }
+}
+
+// Run
+createStars();
+createParticles();
+render();
+</script>
+</body>
+</html>
