@@ -6,22 +6,99 @@
     <title>ספירת העומר</title>
     <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg: #0a0a1a;
+            --card-bg: linear-gradient(135deg, rgba(15,15,40,0.97) 0%, rgba(10,10,25,0.99) 100%);
+            --text-primary: #fffde7;
+            --text-secondary: rgba(255,255,255,0.65);
+            --text-muted: rgba(255,255,255,0.3);
+            --gold: #f4c430;
+            --gold-dim: rgba(244,196,48,0.7);
+            --gold-faint: rgba(244,196,48,0.1);
+            --gold-faintest: rgba(244,196,48,0.04);
+            --border: rgba(244,196,48,0.3);
+            --border-light: rgba(244,196,48,0.15);
+            --border-xlight: rgba(244,196,48,0.12);
+            --nav-bg: rgba(8,8,20,0.95);
+            --nav-border: rgba(244,196,48,0.2);
+            --section-bg: rgba(255,255,255,0.03);
+            --section-border: rgba(244,196,48,0.15);
+            --track-bg: linear-gradient(135deg, rgba(15,15,40,0.97) 0%, rgba(10,10,25,0.99) 100%);
+            --track-border: rgba(244,196,48,0.25);
+            --track-border-hover: rgba(244,196,48,0.45);
+            --track-glow-hover: rgba(244,196,48,0.08);
+            --text-panel-bg: rgba(255,255,255,0.03);
+            --text-panel-border: rgba(244,196,48,0.12);
+            --progress-bg: rgba(255,255,255,0.08);
+            --nav-btn-color: rgba(244,196,48,0.55);
+            --nav-btn-hover: rgba(244,196,48,0.85);
+            --nav-sep: rgba(244,196,48,0.2);
+            --hero-eyebrow: rgba(244,196,48,0.6);
+            --hero-sub: rgba(244,196,48,0.55);
+            --scroll-hint: rgba(244,196,48,0.4);
+            --spinner-bg: rgba(244,196,48,0.2);
+            --card-glow: rgba(244,196,48,0.1);
+            --card-shadow: 0 0 60px rgba(244,196,48,0.1), 0 30px 60px rgba(0,0,0,0.5);
+            --card-top-line: rgba(244,196,48,0.6);
+            --track-top-line: rgba(244,196,48,0.5);
+        }
+        body.light {
+            --bg: #f5f0e8;
+            --card-bg: linear-gradient(135deg, #fffef9 0%, #fdf8f0 100%);
+            --text-primary: #2c1810;
+            --text-secondary: rgba(44,24,16,0.65);
+            --text-muted: rgba(44,24,16,0.35);
+            --gold: #b8860b;
+            --gold-dim: rgba(139,90,43,0.7);
+            --gold-faint: rgba(139,90,43,0.08);
+            --gold-faintest: rgba(139,90,43,0.04);
+            --border: rgba(139,90,43,0.25);
+            --border-light: rgba(139,90,43,0.15);
+            --border-xlight: rgba(139,90,43,0.12);
+            --nav-bg: rgba(255,250,240,0.97);
+            --nav-border: rgba(139,90,43,0.15);
+            --section-bg: rgba(139,90,43,0.04);
+            --section-border: rgba(139,90,43,0.12);
+            --track-bg: linear-gradient(135deg, #fffef9 0%, #fdf8f0 100%);
+            --track-border: rgba(139,90,43,0.2);
+            --track-border-hover: rgba(139,90,43,0.4);
+            --track-glow-hover: rgba(139,90,43,0.06);
+            --text-panel-bg: rgba(139,90,43,0.04);
+            --text-panel-border: rgba(139,90,43,0.12);
+            --progress-bg: rgba(44,24,16,0.08);
+            --nav-btn-color: rgba(92,61,46,0.7);
+            --nav-btn-hover: rgba(92,61,46,0.95);
+            --nav-sep: rgba(139,90,43,0.2);
+            --hero-eyebrow: rgba(92,61,46,0.7);
+            --hero-sub: rgba(92,61,46,0.6);
+            --scroll-hint: rgba(92,61,46,0.45);
+            --spinner-bg: rgba(139,90,43,0.15);
+            --card-glow: rgba(139,90,43,0.08);
+            --card-shadow: 0 0 40px rgba(139,90,43,0.08), 0 20px 40px rgba(0,0,0,0.08);
+            --card-top-line: rgba(139,90,43,0.4);
+            --track-top-line: rgba(139,90,43,0.35);
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             min-height: 100vh;
-            background: #0a0a1a;
+            background: var(--bg);
             font-family: 'Frank Ruhl Libre', serif;
             display: block;
             overflow-x: hidden;
             position: relative;
+            transition: background 0.3s ease, color 0.3s ease;
         }
-        .stars { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; }
+        .stars { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; transition: opacity 0.3s ease; }
+        body.light .stars { opacity: 0.08; }
         .star { position:absolute; background:white; border-radius:50%; animation:twinkle var(--dur,3s) ease-in-out infinite; animation-delay:var(--delay,0s); opacity:0; }
         @keyframes twinkle { 0%,100%{opacity:0;transform:scale(0.8)} 50%{opacity:var(--max-opacity,0.8);transform:scale(1.2)} }
-        .particles { position:fixed; top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0; }
-        .particle { position:absolute; width:3px;height:3px;background:#f4c430;border-radius:50%; animation:float var(--dur,8s) ease-in-out infinite; animation-delay:var(--delay,0s); opacity:0; bottom:-10px; left:var(--left,50%); }
+        .particles { position:fixed; top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0; transition: opacity 0.3s ease; }
+        body.light .particles { opacity: 0; pointer-events: none; }
+        .particle { position:absolute; width:3px;height:3px;background:var(--gold);border-radius:50%; animation:float var(--dur,8s) ease-in-out infinite; animation-delay:var(--delay,0s); opacity:0; bottom:-10px; left:var(--left,50%); }
         @keyframes float { 0%{opacity:0;transform:translateY(0) scale(1)} 10%{opacity:0.8} 90%{opacity:0.4} 100%{opacity:0;transform:translateY(-100vh) scale(0.3) rotate(360deg)} }
-        .moon { position:fixed;top:60px;left:80px;width:80px;height:80px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fffde7,#f4c430,#e6a800);box-shadow:0 0 40px 15px rgba(244,196,48,0.3),0 0 80px 30px rgba(244,196,48,0.1);animation:moonGlow 4s ease-in-out infinite;z-index:1; }
+        .moon { position:fixed;top:60px;left:80px;width:80px;height:80px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fffde7,#f4c430,#e6a800);box-shadow:0 0 40px 15px rgba(244,196,48,0.3),0 0 80px 30px rgba(244,196,48,0.1);animation:moonGlow 4s ease-in-out infinite;z-index:1;transition:opacity 0.3s ease; }
+        body.light .moon { opacity: 0; pointer-events: none; }
         @keyframes moonGlow { 0%,100%{box-shadow:0 0 40px 15px rgba(244,196,48,0.3),0 0 80px 30px rgba(244,196,48,0.1)} 50%{box-shadow:0 0 60px 25px rgba(244,196,48,0.5),0 0 100px 50px rgba(244,196,48,0.2)} }
 
         .container { position:relative;z-index:10;width:100%;max-width:700px;padding:20px;margin:0 auto;padding-bottom:60px; }
@@ -30,108 +107,127 @@
         .hero { height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden; }
         .para-layer { position:absolute;top:0;left:0;width:100%;height:130%;pointer-events:none;will-change:transform; }
         .hero-content { text-align:center;z-index:10;position:relative;padding:20px;will-change:transform,opacity; }
-        .hero-eyebrow { font-size:13px;letter-spacing:6px;color:rgba(244,196,48,0.6);text-transform:uppercase;margin-bottom:20px;animation:hFadeDown 1s ease both; }
+        .hero-eyebrow { font-size:13px;letter-spacing:6px;color:var(--hero-eyebrow);text-transform:uppercase;margin-bottom:20px;animation:hFadeDown 1s ease both;transition:color 0.3s ease; }
         .hero-big { font-size:clamp(64px,15vw,140px);font-weight:900;line-height:0.95;background:linear-gradient(180deg,#fffde7 0%,#f4c430 55%,#c8860a 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:hAppear 1.2s ease both 0.15s;filter:drop-shadow(0 0 50px rgba(244,196,48,0.35)); }
-        .hero-line { width:70px;height:1px;background:linear-gradient(90deg,transparent,rgba(244,196,48,0.6),transparent);margin:22px auto; }
-        .hero-sub { font-size:clamp(13px,2.5vw,17px);color:rgba(244,196,48,0.55);letter-spacing:5px;animation:hFadeDown 1s ease both 0.4s; }
+        body.light .hero-big { background:linear-gradient(180deg,#5c3d2e 0%,#b8860b 55%,#8b5a2b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
+        .hero-line { width:70px;height:1px;background:linear-gradient(90deg,transparent,var(--gold-dim),transparent);margin:22px auto;transition:background 0.3s ease; }
+        .hero-sub { font-size:clamp(13px,2.5vw,17px);color:var(--hero-sub);letter-spacing:5px;animation:hFadeDown 1s ease both 0.4s;transition:color 0.3s ease; }
         @keyframes hAppear { from{opacity:0;transform:scale(0.88) translateY(-24px)} to{opacity:1;transform:scale(1) translateY(0)} }
         @keyframes hFadeDown { from{opacity:0;transform:translateY(-14px)} to{opacity:1;transform:translateY(0)} }
-        .scroll-hint { position:absolute;bottom:36px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:rgba(244,196,48,0.4);font-size:11px;letter-spacing:3px;text-transform:uppercase;animation:shBounce 2.5s ease-in-out infinite; }
-        .scroll-hint-arrow { width:16px;height:16px;border-right:2px solid rgba(244,196,48,0.4);border-bottom:2px solid rgba(244,196,48,0.4);transform:rotate(45deg); }
+        .scroll-hint { position:absolute;bottom:36px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--scroll-hint);font-size:11px;letter-spacing:3px;text-transform:uppercase;animation:shBounce 2.5s ease-in-out infinite;transition:color 0.3s ease; }
+        .scroll-hint-arrow { width:16px;height:16px;border-right:2px solid var(--scroll-hint);border-bottom:2px solid var(--scroll-hint);transform:rotate(45deg);transition:border-color 0.3s ease; }
         @keyframes shBounce { 0%,100%{transform:translateX(-50%) translateY(0);opacity:0.4} 50%{transform:translateX(-50%) translateY(10px);opacity:0.85} }
 
         .card {
-            background: linear-gradient(135deg, rgba(15,15,40,0.97) 0%, rgba(10,10,25,0.99) 100%);
-            border: 1px solid rgba(244,196,48,0.3);
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             border-radius: 24px;
             padding: 44px 38px;
             text-align: center;
-            box-shadow: 0 0 60px rgba(244,196,48,0.1), 0 30px 60px rgba(0,0,0,0.5);
+            box-shadow: var(--card-shadow);
             animation: cardFloat 6s ease-in-out infinite;
             position: relative;
             overflow: hidden;
+            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
-        .card::before { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(244,196,48,0.6),transparent); }
+        .card::before { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--card-top-line),transparent); }
         @keyframes cardFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
 
-        .header-title { font-size:13px;letter-spacing:4px;color:rgba(244,196,48,0.7);text-transform:uppercase;margin-bottom:8px; }
-        .sefirah-badge { display:inline-block;background:rgba(244,196,48,0.1);border:1px solid rgba(244,196,48,0.3);border-radius:20px;padding:6px 18px;font-size:14px;color:#f4c430;margin-bottom:28px;letter-spacing:1px; }
+        .header-title { font-size:13px;letter-spacing:4px;color:var(--gold-dim);text-transform:uppercase;margin-bottom:8px;transition:color 0.3s ease; }
+        .sefirah-badge { display:inline-block;background:var(--gold-faint);border:1px solid var(--border);border-radius:20px;padding:6px 18px;font-size:14px;color:var(--gold);margin-bottom:28px;letter-spacing:1px;transition:all 0.3s ease; }
         .day-number { font-size:clamp(90px,20vw,140px);font-weight:900;line-height:1;background:linear-gradient(180deg,#fffde7 0%,#f4c430 50%,#c8860a 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px;animation:numPulse 4s ease-in-out infinite;display:block; }
+        body.light .day-number { background:linear-gradient(180deg,#5c3d2e 0%,#b8860b 50%,#8b5a2b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
         @keyframes numPulse { 0%,100%{filter:drop-shadow(0 0 20px rgba(244,196,48,0.4))} 50%{filter:drop-shadow(0 0 40px rgba(244,196,48,0.8))} }
-        .omer-text { font-size:clamp(18px,4vw,24px);font-weight:500;color:#fffde7;line-height:1.8;margin-bottom:8px; }
-        .weeks-part { font-size:0.82em;color:rgba(244,196,48,0.85); }
+        .omer-text { font-size:clamp(18px,4vw,24px);font-weight:500;color:var(--text-primary);line-height:1.8;margin-bottom:8px;transition:color 0.3s ease; }
+        .weeks-part { font-size:0.82em;color:var(--gold-dim);transition:color 0.3s ease; }
 
-        .divider { width:60px;height:2px;background:linear-gradient(90deg,transparent,#f4c430,transparent);margin:26px auto; }
+        .divider { width:60px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:26px auto;transition:background 0.3s ease; }
 
         /* Blessing section */
         .bracha-section {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(244,196,48,0.15);
+            background: var(--section-bg);
+            border: 1px solid var(--section-border);
             border-radius: 16px;
             padding: 22px 20px;
             margin-bottom: 16px;
             text-align: center;
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
-        .section-label { font-size:11px;letter-spacing:3px;color:rgba(244,196,48,0.55);margin-bottom:14px;text-transform:uppercase; }
-        .bracha-text { font-size:clamp(16px,3.5vw,20px);color:#fffde7;line-height:2;direction:rtl; }
-        .bracha-highlight { color:#f4c430;font-weight:700; }
+        .section-label { font-size:11px;letter-spacing:3px;color:var(--gold-dim);margin-bottom:14px;text-transform:uppercase;transition:color 0.3s ease; }
+        .bracha-text { font-size:clamp(16px,3.5vw,20px);color:var(--text-primary);line-height:2;direction:rtl;transition:color 0.3s ease; }
+        .bracha-highlight { color:var(--gold);font-weight:700;transition:color 0.3s ease; }
 
         /* Harachaman */
         .harachaman-section {
-            background: rgba(244,196,48,0.04);
-            border: 1px solid rgba(244,196,48,0.12);
+            background: var(--gold-faintest);
+            border: 1px solid var(--border-xlight);
             border-radius: 16px;
             padding: 20px;
             margin-bottom: 16px;
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
-        .harachaman-text { font-size:clamp(15px,3vw,18px);color:rgba(255,255,255,0.85);line-height:2;direction:rtl; }
+        .harachaman-text { font-size:clamp(15px,3vw,18px);color:var(--text-secondary);line-height:2;direction:rtl;transition:color 0.3s ease; }
 
         /* Torah section */
         .torah-section {
-            background: rgba(244,196,48,0.05);
+            background: var(--gold-faint);
             border-radius: 16px;
             padding: 24px 20px;
-            border: 1px solid rgba(244,196,48,0.15);
+            border: 1px solid var(--section-border);
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
-        .torah-period-title { font-size:clamp(17px,3.5vw,21px);font-weight:700;color:#f4c430;margin-bottom:14px;direction:rtl;line-height:1.4; }
-        .torah-quote { font-size:clamp(16px,3.2vw,20px);font-weight:500;color:#fffde7;line-height:1.85;margin-bottom:8px;direction:rtl; }
-        .torah-quote::before { content:'"';color:#f4c430;font-size:1.3em;font-weight:900; }
-        .torah-quote::after { content:'"';color:#f4c430;font-size:1.3em;font-weight:900; }
-        .torah-source { font-size:13px;color:rgba(244,196,48,0.7);font-style:italic;margin-bottom:16px; }
-        .torah-body { direction:rtl;border-top:1px solid rgba(244,196,48,0.1);padding-top:14px; }
-        .torah-body p { font-size:clamp(14px,2.8vw,16px);color:rgba(255,255,255,0.72);line-height:2.05;margin-bottom:14px; }
+        .torah-period-title { font-size:clamp(17px,3.5vw,21px);font-weight:700;color:var(--gold);margin-bottom:14px;direction:rtl;line-height:1.4;transition:color 0.3s ease; }
+        .torah-quote { font-size:clamp(16px,3.2vw,20px);font-weight:500;color:var(--text-primary);line-height:1.85;margin-bottom:8px;direction:rtl;transition:color 0.3s ease; }
+        .torah-quote::before { content:'"';color:var(--gold);font-size:1.3em;font-weight:900; }
+        .torah-quote::after { content:'"';color:var(--gold);font-size:1.3em;font-weight:900; }
+        .torah-source { font-size:13px;color:var(--gold-dim);font-style:italic;margin-bottom:16px;transition:color 0.3s ease; }
+        .torah-body { direction:rtl;border-top:1px solid var(--border-xlight);padding-top:14px;transition:border-color 0.3s ease; }
+        .torah-body p { font-size:clamp(14px,2.8vw,16px);color:var(--text-secondary);line-height:2.05;margin-bottom:14px;transition:color 0.3s ease; }
         .torah-body p:last-child { margin-bottom:0; }
-        .torah-body p.em { color:rgba(244,196,48,0.85); }
+        .torah-body p.em { color:var(--gold-dim);transition:color 0.3s ease; }
 
-        .date-display { margin-top:26px;font-size:13px;color:rgba(255,255,255,0.3);letter-spacing:1px; }
-        .message-card { font-size:clamp(22px,5vw,32px);color:#fffde7;line-height:1.6; }
-        .message-sub { font-size:16px;color:rgba(244,196,48,0.7);margin-top:12px; }
+        .date-display { margin-top:26px;font-size:13px;color:var(--text-muted);letter-spacing:1px;transition:color 0.3s ease; }
+        .message-card { font-size:clamp(22px,5vw,32px);color:var(--text-primary);line-height:1.6;transition:color 0.3s ease; }
+        .message-sub { font-size:16px;color:var(--gold-dim);margin-top:12px;transition:color 0.3s ease; }
 
         @media(max-width:480px){ .card{padding:30px 18px;} .moon{width:50px;height:50px;top:30px;left:30px;} }
 
         /* ── Top Navigation Bar ── */
         .top-nav {
             position: fixed; top: 0; right: 0; left: 0; z-index: 1000;
-            background: rgba(8,8,20,0.95);
-            border-bottom: 1px solid rgba(244,196,48,0.2);
+            background: var(--nav-bg);
+            border-bottom: 1px solid var(--nav-border);
             backdrop-filter: blur(12px);
             display: flex; align-items: center; justify-content: center;
             height: 54px; gap: 0;
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
         .nav-btn {
             background: none; border: none; cursor: pointer;
             font-family: 'Frank Ruhl Libre', serif;
             font-size: 15px; font-weight: 500;
-            color: rgba(244,196,48,0.55);
+            color: var(--nav-btn-color);
             padding: 0 28px; height: 100%;
             border-bottom: 2px solid transparent;
             transition: color 0.25s, border-color 0.25s;
             letter-spacing: 0.5px;
             display: flex; align-items: center; gap: 7px;
         }
-        .nav-btn:hover { color: rgba(244,196,48,0.85); }
-        .nav-btn.active { color: #f4c430; border-bottom-color: #f4c430; }
-        .nav-sep { width: 1px; height: 22px; background: rgba(244,196,48,0.2); }
+        .nav-btn:hover { color: var(--nav-btn-hover); }
+        .nav-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+        .nav-sep { width: 1px; height: 22px; background: var(--nav-sep); transition: background 0.3s ease; }
+
+        /* ── Theme Toggle Button ── */
+        .theme-toggle {
+            position: absolute; left: 16px;
+            background: none; border: 1px solid var(--border);
+            border-radius: 20px; padding: 5px 12px;
+            cursor: pointer; font-size: 16px;
+            color: var(--gold); transition: all 0.3s ease;
+            display: flex; align-items: center; gap: 5px;
+            line-height: 1;
+        }
+        .theme-toggle:hover { background: var(--gold-faint); border-color: var(--gold); }
 
         /* ── Learning View ── */
         #learningView { display: none; position: relative; z-index: 10; padding-top: 70px; }
@@ -147,9 +243,14 @@
             background-clip: text;
             margin-bottom: 8px;
         }
+        body.light .learning-title {
+            background: linear-gradient(180deg, #5c3d2e 0%, #b8860b 60%, #8b5a2b 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
         .learning-subtitle {
-            font-size: 13px; letter-spacing: 4px; color: rgba(244,196,48,0.5);
-            text-transform: uppercase;
+            font-size: 13px; letter-spacing: 4px; color: var(--gold-dim);
+            text-transform: uppercase; transition: color 0.3s ease;
         }
 
         .tracks-container {
@@ -159,34 +260,34 @@
 
         /* ── Track Card ── */
         .track-card {
-            background: linear-gradient(135deg, rgba(15,15,40,0.97) 0%, rgba(10,10,25,0.99) 100%);
-            border: 1px solid rgba(244,196,48,0.25);
+            background: var(--track-bg);
+            border: 1px solid var(--track-border);
             border-radius: 20px;
             padding: 26px 24px 22px;
             position: relative; overflow: hidden;
-            transition: border-color 0.3s, box-shadow 0.3s;
+            transition: border-color 0.3s, box-shadow 0.3s, background 0.3s ease;
         }
         .track-card::before {
             content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(244,196,48,0.5), transparent);
+            background: linear-gradient(90deg, transparent, var(--track-top-line), transparent);
         }
         .track-card:hover {
-            border-color: rgba(244,196,48,0.45);
-            box-shadow: 0 0 40px rgba(244,196,48,0.08);
+            border-color: var(--track-border-hover);
+            box-shadow: 0 0 40px var(--track-glow-hover);
         }
 
         .track-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
         .track-info { flex: 1; }
         .track-icon { font-size: 24px; margin-bottom: 4px; }
-        .track-title { font-size: 18px; font-weight: 700; color: #f4c430; margin-bottom: 3px; }
-        .track-subtitle { font-size: 13px; color: rgba(255,255,255,0.55); line-height: 1.5; }
-        .track-current { font-size: 14px; color: rgba(244,196,48,0.8); font-weight: 500; margin-top: 4px; }
+        .track-title { font-size: 18px; font-weight: 700; color: var(--gold); margin-bottom: 3px; transition: color 0.3s ease; }
+        .track-subtitle { font-size: 13px; color: var(--text-secondary); line-height: 1.5; transition: color 0.3s ease; }
+        .track-current { font-size: 14px; color: var(--gold-dim); font-weight: 500; margin-top: 4px; transition: color 0.3s ease; }
 
         /* Progress bar */
         .progress-wrap { margin-bottom: 16px; }
-        .progress-label { font-size: 11px; letter-spacing: 2px; color: rgba(244,196,48,0.45); margin-bottom: 6px; text-transform: uppercase; }
+        .progress-label { font-size: 11px; letter-spacing: 2px; color: var(--gold-dim); margin-bottom: 6px; text-transform: uppercase; transition: color 0.3s ease; }
         .progress-bar-bg {
-            height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden;
+            height: 4px; background: var(--progress-bg); border-radius: 2px; overflow: hidden; transition: background 0.3s ease;
         }
         .progress-bar-fill {
             height: 100%; background: linear-gradient(90deg, #c8860a, #f4c430);
@@ -296,6 +397,10 @@
     <div class="nav-sep"></div>
     <button class="nav-btn" id="navLearn" onclick="switchView('learning')">
         <span>📖</span> הלימוד שלי
+    </button>
+    <div style="flex:1"></div>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="החלף מצב תצוגה">
+        <span id="themeIcon">☀️</span>
     </button>
 </nav>
 
@@ -1379,6 +1484,25 @@ function initParallax() {
     }, { passive: true });
 }
 initParallax();
+
+// ── Light / Dark Mode ──
+function applyTheme(mode) {
+    if (mode === 'light') {
+        document.body.classList.add('light');
+        document.getElementById('themeIcon').textContent = '🌙';
+    } else {
+        document.body.classList.remove('light');
+        document.getElementById('themeIcon').textContent = '☀️';
+    }
+}
+function toggleTheme() {
+    const isLight = document.body.classList.contains('light');
+    const next = isLight ? 'dark' : 'light';
+    localStorage.setItem('colorScheme', next);
+    applyTheme(next);
+}
+// Apply saved preference on load
+applyTheme(localStorage.getItem('colorScheme') || 'dark');
 </script>
 </body>
 </html>
