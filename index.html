@@ -457,6 +457,60 @@
         body.light .error-msg { color: rgba(180,40,40,0.8); }
         body.light .progress-bar-fill { background: linear-gradient(90deg, #8b5a2b, #b8860b); }
 
+        /* ── Aramaic Word of the Day ── */
+        .aramaic-card {
+            background: var(--track-bg);
+            border: 1px solid var(--track-border);
+            border-radius: 20px;
+            padding: 30px 28px 26px;
+            text-align: center;
+            position: relative; overflow: hidden;
+            transition: border-color 0.3s, background 0.3s;
+        }
+        .aramaic-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--track-top-line), transparent);
+        }
+        .aramaic-badge {
+            display: inline-block;
+            font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+            color: var(--gold-dim); margin-bottom: 20px;
+            border: 1px solid var(--border);
+            border-radius: 20px; padding: 5px 16px;
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .aramaic-word {
+            font-size: clamp(44px, 10vw, 72px);
+            font-weight: 900; color: var(--gold);
+            line-height: 1.1; margin-bottom: 6px;
+            filter: drop-shadow(0 0 20px rgba(244,196,48,0.25));
+            transition: color 0.3s;
+        }
+        .aramaic-transliteration {
+            font-size: 15px; color: var(--text-secondary);
+            letter-spacing: 1px; margin-bottom: 18px;
+            font-style: italic; transition: color 0.3s;
+        }
+        .aramaic-divider {
+            width: 40px; height: 1px; margin: 0 auto 18px;
+            background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+        }
+        .aramaic-meaning {
+            font-size: clamp(18px, 4vw, 24px);
+            font-weight: 600; color: var(--text-primary);
+            margin-bottom: 10px; direction: rtl;
+            transition: color 0.3s;
+        }
+        .aramaic-example {
+            font-size: clamp(13px, 2.5vw, 15px);
+            color: var(--text-secondary); line-height: 1.9;
+            direction: rtl; margin-top: 14px;
+            border-top: 1px solid var(--section-border);
+            padding-top: 14px; transition: color 0.3s, border-color 0.3s;
+        }
+        .aramaic-example em { color: var(--gold); font-style: normal; font-weight: 600; }
+        .aramaic-day-count { font-size: 11px; color: var(--text-muted); margin-top: 14px; letter-spacing: 1px; }
+
         /* ── Font size control ── */
         .font-size-controls {
             display: flex; align-items: center; gap: 6px;
@@ -614,6 +668,17 @@
                 <div class="text-panel-title">הטקסט</div>
                 <div id="tanakhTextContent"></div>
             </div>
+        </div>
+
+        <!-- Aramaic Word of the Day -->
+        <div class="aramaic-card" id="aramaicCard">
+            <div class="aramaic-badge">מילת היום בארמית</div>
+            <div class="aramaic-word" id="aramaicWord"></div>
+            <div class="aramaic-transliteration" id="aramaicTranslit"></div>
+            <div class="aramaic-divider"></div>
+            <div class="aramaic-meaning" id="aramaicMeaning"></div>
+            <div class="aramaic-example" id="aramaicExample"></div>
+            <div class="aramaic-day-count" id="aramaicDayCount"></div>
         </div>
 
     </div>
@@ -1660,6 +1725,105 @@ function initLearnHero() {
     }, { passive: true });
 }
 initLearnHero();
+
+// ── Aramaic Word of the Day ──
+const ARAMAIC_WORDS = [
+  { w:'הָכָא', t:'hakhá', m:'כאן', e:'<em>הָכָא</em> מַאי עָבֵיד? — מה הוא עושה כאן?' },
+  { w:'הָתָם', t:'hatám', m:'שם', e:'<em>הָתָם</em> בַּדָּרוֹם שָׁאנֵי — שם בדרום שונה הדין.' },
+  { w:'מַאי', t:'mai', m:'מה', e:'<em>מַאי</em> טַעְמָא? — מה הטעם / מה הסיבה?' },
+  { w:'פְּשִׁיטָא', t:'peshitá', m:'פשוט, ברור', e:'<em>פְּשִׁיטָא</em>! — ברור! מה החידוש?' },
+  { w:'תֵּיקוּ', t:'teikú', m:'נשאר בספק', e:'<em>תֵּיקוּ</em> — השאלה נותרת ללא הכרעה.' },
+  { w:'אִיבַּעְיָא', t:'ivaiyá', m:'נשאלה שאלה', e:'<em>אִיבַּעְיָא</em> לְהוּ — שאלה עלתה ביניהם.' },
+  { w:'תָּא שְׁמַע', t:'tá shma', m:'בוא ושמע (ראיה)', e:'<em>תָּא שְׁמַע</em>: שנינו במשנה... — הנה ראיה.' },
+  { w:'אַלְמָא', t:'almá', m:'מכאן ש / אם כן', e:'<em>אַלְמָא</em> קסבר... — מכאן שהוא סבור כי...' },
+  { w:'מֵיתִיב', t:'meitív', m:'מקשה, מביא קושיה', e:'<em>מֵיתִיב</em> רבי יוחנן — הקשה רבי יוחנן.' },
+  { w:'תִּיּוּבְתָּא', t:'tiyuvtá', m:'קושיה חזקה, סתירה', e:'<em>תִּיּוּבְתָּא</em> דְּרב — קושיה על שיטת רב.' },
+  { w:'שָׁאנֵי', t:'shání', m:'שונה, יוצא דופן', e:'הָתָם <em>שָׁאנֵי</em> — שם המקרה שונה.' },
+  { w:'קַמַּשְׁמַע לַן', t:"qá mashma lan", m:'בא ללמדנו', e:'<em>קַמַּשְׁמַע לַן</em> — לכן יש צורך בפסוק זה.' },
+  { w:'כְּגוֹן', t:'kegón', m:'כמו, למשל', e:'<em>כְּגוֹן</em> דְּאָמַר... — למשל אם אמר...' },
+  { w:'דְּהַיְינוּ', t:'dehayní', m:'כלומר, שזהו', e:'<em>דְּהַיְינוּ</em> הָא דְּאָמַר רב — כלומר זהו מה שאמר רב.' },
+  { w:'הַיְינוּ', t:'hayní', m:'הוא הדין, זהו', e:'<em>הַיְינוּ</em> דְּקַתָּנֵי — זוהי כוונת המשנה.' },
+  { w:'אֲפִילוּ הָכִי', t:'afilu hakhí', m:'אפילו כך', e:'<em>אֲפִילוּ הָכִי</em> אָסוּר — אפילו כך אסור.' },
+  { w:'אַדְּרַבָּה', t:'adrábba', m:'אדרבא, להיפך', e:'<em>אַדְּרַבָּה</em> — להיפך! מזה ראיה לצד השני.' },
+  { w:'אַכַּתִּי', t:'akhátei', m:'עדיין', e:'<em>אַכַּתִּי</em> קַשְׁיָא — עדיין קשה, עדיין לא תירצת.' },
+  { w:'לָא שָׁנָא', t:'lá shaná', m:'לא שנא, אין הבדל', e:'<em>לָא שָׁנָא</em> הָא וְלָא שָׁנָא הָא — אין הבדל בין זה לזה.' },
+  { w:'אֵי הָכִי', t:'ei hakhí', m:'אם כך', e:'<em>אֵי הָכִי</em> — אם אכן כך הוא, מדוע...?' },
+  { w:'בְּעֵי', t:'baei', m:'שואל, מבקש', e:'<em>בְּעֵי</em> רב אשי — שאל רב אשי.' },
+  { w:'לֵימָא', t:'leimá', m:'נאמר? האם נאמר?', e:'<em>לֵימָא</em> תֶּהֱוֵי תְּיוּבְתָּא — האם נאמר שזו קושיה?' },
+  { w:'אִי נָמֵי', t:'ei namí', m:'או גם, לחלופין', e:'<em>אִי נָמֵי</em> אֵימָא — או שאפשר לומר אחרת.' },
+  { w:'פְּלוּגְתָּא', t:'plugtá', m:'מחלוקת', e:'<em>פְּלוּגְתָּא</em> דְּרב וּשְׁמוּאֵל — מחלוקת בין רב לשמואל.' },
+  { w:'אֲלִיבָּא דְּ', t:'alíba de', m:'לפי שיטת, לדעת', e:'<em>אֲלִיבָּא דְּ</em>רבי עקיבא — לפי שיטת רבי עקיבא.' },
+  { w:'הֵיכִי', t:'hekhi', m:'איך, כיצד', e:'<em>הֵיכִי</em> דָמֵי? — כיצד בדיוק עובד זה?' },
+  { w:'כִּי הַאי גַּוְנָא', t:'ki hai gavná', m:'כעין זה, כגון זה', e:'<em>כִּי הַאי גַּוְנָא</em> מַאי? — ובמקרה כזה מה הדין?' },
+  { w:'וְכִי תֵּימָא', t:'vekhí teimá', m:'ואם תאמר', e:'<em>וְכִי תֵּימָא</em> דְּשָׁאנֵי — ואם תאמר ששם שונה...' },
+  { w:'קַשְׁיָא', t:'qashiyá', m:'קשה, קושיה', e:'<em>קַשְׁיָא</em> הַאי אַהַאי — קשה סתירה בין אלו.' },
+  { w:'נִיחָא', t:'nikhá', m:'ניחא, מובן, מסתדר', e:'<em>נִיחָא</em> לְמַאן דְּאָמַר... — לפי מי שאומר... מסתדר.' },
+  { w:'מִנַּיִן', t:'minayín', m:'מניין, מאיפה', e:'<em>מִנַּיִן</em>? תַּלְמוּד לוֹמַר... — מאיפה לומדים? הפסוק אומר...' },
+  { w:'אֵיכָּא', t:'ekhá', m:'יש, קיים', e:'<em>אֵיכָּא</em> לְמֵימַר — יש מקום לומר.' },
+  { w:'לֵיכָּא', t:'lekhá', m:'אין, לא קיים', e:'<em>לֵיכָּא</em> מִידֵּי — אין כאן שום דבר.' },
+  { w:'מִינַּהּ', t:'minnáh', m:'ממנה, מכאן', e:'שְׁמַע <em>מִינַּהּ</em> — למד מכאן.' },
+  { w:'שְׁמַע מִינַּהּ', t:'shma minnáh', m:'למד מכאן', e:'<em>שְׁמַע מִינַּהּ</em> תְּלָת — למד מכאן שלוש הלכות.' },
+  { w:'אֵימַת', t:'eimat', m:'מתי', e:'<em>אֵימַת</em>? — מתי בדיוק חל הדין הזה?' },
+  { w:'חֲדָא', t:'khadá', m:'אחת', e:'<em>חֲדָא</em> מִינַּיְיהוּ — אחת מהן.' },
+  { w:'תַּרְתֵּי', t:'tartéi', m:'שתיים', e:'<em>תַּרְתֵּי</em> לְמָה לִי? — למה צריך שתיים?' },
+  { w:'יוֹמָא', t:'yomá', m:'יום', e:'<em>יוֹמָא</em> חַד — יום אחד.' },
+  { w:'לֵילְיָא', t:'leiliyá', m:'לילה', e:'כׇּל <em>לֵילְיָא</em> — כל הלילה.' },
+  { w:'שַׁתָּא', t:'shatá', m:'שנה', e:'כׇּל <em>שַׁתָּא</em> — כל שנה.' },
+  { w:'רַבָּה', t:'rabá', m:'הרבה, גדול', e:'מִלְּתָא <em>רַבָּה</em> — דבר גדול.' },
+  { w:'זוּטָא', t:'zutá', m:'קטן', e:'<em>זוּטָא</em> הוּא — הוא קטן.' },
+  { w:'בְּהָדֵי', t:'bhadéi', m:'ביחד עם, אצל', e:'<em>בְּהָדֵי</em> הֲדָדֵי — ביחד, זה עם זה.' },
+  { w:'הֲדָדֵי', t:'hadadéi', m:'זה את זה, הדדי', e:'מְסַיְּיעִי <em>הֲדָדֵי</em> — עוזרים זה לזה.' },
+  { w:'כַּוְותֵיהּ', t:'kavvatéih', m:'כמותו, לפיו', e:'הִלְכְּתָא <em>כַּוְותֵיהּ</em> — ההלכה כמותו.' },
+  { w:'דְּאָמַר', t:'de-amár', m:'שאמר, שאומר', e:'מַאן <em>דְּאָמַר</em>... — מי שאומר...' },
+  { w:'קָאָמַר', t:'qa-amár', m:'אומר (בהווה)', e:'מַאי <em>קָאָמַר</em>? — מה הוא אומר / מה כוונתו?' },
+  { w:'אֲמַר לֵיהּ', t:'amar léih', m:'אמר לו', e:'<em>אֲמַר לֵיהּ</em> אַבָּיֵי לְרָבָא — אמר לו אביי לרבא.' },
+  { w:'מַתְנִי׳', t:'matni', m:'שנינו במשנה', e:'<em>מַתְנִי׳</em>: הָאִשָּׁה שֶׁנָּתְנָה... — המשנה אומרת...' },
+  { w:'גְּמָרָא', t:'gemará', m:'גמרא, לימוד', e:'<em>גְּמָרָא</em> גְּמוֹר — למד היטב.' },
+  { w:'תָּנָא', t:'taná', m:'תנא, שנה, לימד', e:'<em>תָּנָא</em> — שנה התנא ברייתא.' },
+  { w:'אִתְּמַר', t:'itmar', m:'נאמר (אמוראים)', e:'<em>אִתְּמַר</em>: אָמַר רַב... — נאמר בשם רב...' },
+  { w:'הוּא הַדִּין', t:'hu hadin', m:'הוא הדין, אותו דין', e:'<em>הוּא הַדִּין</em> לְ... — אותו הדין חל גם ל...' },
+  { w:'לֹא מִיבַּעְיָא', t:'lo mivaiyá', m:'לא רק... אלא אף', e:'<em>לֹא מִיבַּעְיָא</em> הָא, אֶלָּא אֲפִילוּ הָא — לא רק זה, אף זה.' },
+  { w:'כׇּל שֶׁכֵּן', t:'kol shekén', m:'קל וחומר, בוודאי', e:'<em>כׇּל שֶׁכֵּן</em> — קל וחומר שכן.' },
+  { w:'בְּדִיעֲבַד', t:'bedi-avád', m:'בדיעבד, לאחר מעשה', e:'<em>בְּדִיעֲבַד</em> כָּשֵׁר — לאחר שנעשה — כשר.' },
+  { w:'לְכַתְּחִלָּה', t:'lekhatekhilá', m:'לכתחילה, מלכתחילה', e:'<em>לְכַתְּחִלָּה</em> אֵינוֹ עוֹשֶׂה כֵּן — אין לעשות כן מלכתחילה.' },
+  { w:'אַלִּיבָּא', t:'allibá', m:'לפי, לדעת', e:'<em>אַלִּיבָּא</em> דְּכוּלֵּי עָלְמָא — לפי דעת כולם.' },
+  { w:'כוּלֵּי עָלְמָא', t:'kulei álma', m:'כולם, הכל', e:'<em>כוּלֵּי עָלְמָא</em> לָא פְּלִיגֵי — בזה אין מחלוקת.' },
+  { w:'אִיכָּא בֵּינַיְיהוּ', t:'ika beinaiyhu', m:'יש ביניהם הבדל', e:'<em>אִיכָּא בֵּינַיְיהוּ</em> — ההבדל המעשי ביניהם הוא...' },
+  { w:'בָּעֵי רַחֲמֵי', t:'baei rakhamei', m:'מבקש רחמים, מתפלל', e:'<em>בָּעֵי רַחֲמֵי</em> עַל נַפְשֵׁיהּ — התפלל על עצמו.' },
+  { w:'שַׁפִּיר', t:'shapír', m:'יפה, בסדר, נכון', e:'<em>שַׁפִּיר</em> קָאָמַר — נכון הוא אומר.' },
+  { w:'לֵישׁ לֵיהּ', t:'leish léih', m:'אין לו, חסר לו', e:'<em>לֵישׁ לֵיהּ</em> — אין לו את הדין הזה.' },
+  { w:'אִית לֵיהּ', t:'it léih', m:'יש לו', e:'<em>אִית לֵיהּ</em> לְהַאי תַּנָּא — לתנא זה יש שיטה כזו.' },
+  { w:'מִדְּרַבָּנַן', t:'midi-rabbanan', m:'מדרבנן, מדברי חכמים', e:'<em>מִדְּרַבָּנַן</em> הוּא — זה מדברי חכמים בלבד.' },
+  { w:'מִדְּאוֹרַיְיתָא', t:'midi-oraita', m:'מהתורה, מדאורייתא', e:'<em>מִדְּאוֹרַיְיתָא</em> שָׁרֵי — מן התורה מותר.' },
+  { w:'אִיסוּר', t:'isúr', m:'איסור', e:'<em>אִיסוּר</em> דְּאוֹרַיְיתָא — איסור מן התורה.' },
+  { w:'פְּטוּר', t:'patúr', m:'פטור', e:'<em>פְּטוּר</em> אֲבָל אָסוּר — פטור אבל אסור.' },
+  { w:'חַיָּיב', t:'khaiyáv', m:'חייב', e:'<em>חַיָּיב</em> לְשַׁלֵּם — חייב לשלם.' },
+  { w:'מוּדֶה', t:'modé', m:'מודה, מסכים', e:'<em>מוּדֶה</em> בּוֹ רַבִּי — רבי מסכים בזה.' },
+  { w:'פְּלִיגֵי', t:'peligéi', m:'חולקים, נחלקים', e:'בְּהַאי <em>פְּלִיגֵי</em> — בזה הם חולקים.' },
+  { w:'הַהוּא', t:'hahu', m:'אותו, הוא', e:'<em>הַהוּא</em> גַּבְרָא — אותו אדם.' },
+  { w:'הַהִיא', t:'hahi', m:'אותה, היא', e:'<em>הַהִיא</em> אִיתְּתָא — אותה אישה.' },
+  { w:'מַשְׁכַּחַת לַהּ', t:'mashkakhat lah', m:'מוצא אותה, מתקיים', e:'הֵיכִי <em>מַשְׁכַּחַת לַהּ</em>? — כיצד מתקיים מקרה כזה?' },
+  { w:'בָּבָא', t:'babá', m:'שער, פרק, חלק', e:'<em>בָּבָא</em> קַמָּא — השער הראשון (שם מסכת).' },
+  { w:'סֻגְיָא', t:'sugiyá', m:'סוגיה, קטע בגמרא', e:'<em>סֻגְיָא</em> דְּשַׁמְעַתָּא — הסוגיה של הלכה זו.' },
+  { w:'שַׁמְעַתָּא', t:'shama-atá', m:'שמועה, הלכה, סוגיה', e:'הַאי <em>שַׁמְעַתָּא</em> קַשְׁיָא — הלכה זו קשה.' },
+];
+
+function renderAramaicWord() {
+    // Change word daily based on date (Israel time)
+    const nowUTC = new Date();
+    const nowIL = new Date(nowUTC.getTime() + 3 * 3600 * 1000);
+    const dayOfYear = Math.floor((nowIL - new Date(Date.UTC(nowIL.getUTCFullYear(), 0, 1))) / 86400000);
+    const idx = dayOfYear % ARAMAIC_WORDS.length;
+    const w = ARAMAIC_WORDS[idx];
+
+    document.getElementById('aramaicWord').textContent = w.w;
+    document.getElementById('aramaicTranslit').textContent = w.t;
+    document.getElementById('aramaicMeaning').textContent = w.m;
+    document.getElementById('aramaicExample').innerHTML = w.e;
+    document.getElementById('aramaicDayCount').textContent =
+        `מילה ${idx + 1} מתוך ${ARAMAIC_WORDS.length}`;
+}
+renderAramaicWord();
 
 // ── Font Size Control ──
 let currentFontSize = parseInt(localStorage.getItem('fontSize') || '18');
