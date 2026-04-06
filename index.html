@@ -227,9 +227,29 @@ function getOmerFormula(day) {
 }
 
 function getTodayOmerDay() {
-    const today = new Date(); today.setHours(0,0,0,0);
-    const start = new Date(OMER_START); start.setHours(0,0,0,0);
-    return Math.floor((today - start) / 86400000) + 1;
+    // Israel is UTC+3 in April (IDT). Add offset manually — avoids toLocaleString browser inconsistencies.
+    const nowUTC = new Date();
+    const israelOffsetMs = 3 * 60 * 60 * 1000;
+    const nowIsrael = new Date(nowUTC.getTime() + israelOffsetMs);
+
+    const hour = nowIsrael.getUTCHours();
+
+    // Nightfall (צאת הכוכבים) approximation for Israel in April: ~20:00 IDT
+    const isAfterNightfall = hour >= 20;
+
+    // Build today's date in Israel (UTC-based, after applying offset)
+    const halachicDate = new Date(Date.UTC(
+        nowIsrael.getUTCFullYear(),
+        nowIsrael.getUTCMonth(),
+        nowIsrael.getUTCDate()
+    ));
+    // Before nightfall = still on the previous Jewish day
+    if (!isAfterNightfall) {
+        halachicDate.setUTCDate(halachicDate.getUTCDate() - 1);
+    }
+
+    const start = new Date(Date.UTC(2026, 3, 2)); // April 2, 2026 — Day 1 of Omer
+    return Math.floor((halachicDate - start) / 86400000) + 1;
 }
 
 function getHebrewDate() {
