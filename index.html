@@ -11,12 +11,9 @@
             min-height: 100vh;
             background: #0a0a1a;
             font-family: 'Frank Ruhl Libre', serif;
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
+            display: block;
             overflow-x: hidden;
             position: relative;
-            padding: 30px 0 60px;
         }
         .stars { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; }
         .star { position:absolute; background:white; border-radius:50%; animation:twinkle var(--dur,3s) ease-in-out infinite; animation-delay:var(--delay,0s); opacity:0; }
@@ -27,7 +24,21 @@
         .moon { position:fixed;top:60px;left:80px;width:80px;height:80px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fffde7,#f4c430,#e6a800);box-shadow:0 0 40px 15px rgba(244,196,48,0.3),0 0 80px 30px rgba(244,196,48,0.1);animation:moonGlow 4s ease-in-out infinite;z-index:1; }
         @keyframes moonGlow { 0%,100%{box-shadow:0 0 40px 15px rgba(244,196,48,0.3),0 0 80px 30px rgba(244,196,48,0.1)} 50%{box-shadow:0 0 60px 25px rgba(244,196,48,0.5),0 0 100px 50px rgba(244,196,48,0.2)} }
 
-        .container { position:relative;z-index:10;width:100%;max-width:700px;padding:20px; }
+        .container { position:relative;z-index:10;width:100%;max-width:700px;padding:20px;margin:0 auto;padding-bottom:60px; }
+
+        /* ── Hero / Parallax ── */
+        .hero { height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden; }
+        .para-layer { position:absolute;top:0;left:0;width:100%;height:130%;pointer-events:none;will-change:transform; }
+        .hero-content { text-align:center;z-index:10;position:relative;padding:20px;will-change:transform,opacity; }
+        .hero-eyebrow { font-size:13px;letter-spacing:6px;color:rgba(244,196,48,0.6);text-transform:uppercase;margin-bottom:20px;animation:hFadeDown 1s ease both; }
+        .hero-big { font-size:clamp(64px,15vw,140px);font-weight:900;line-height:0.95;background:linear-gradient(180deg,#fffde7 0%,#f4c430 55%,#c8860a 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:hAppear 1.2s ease both 0.15s;filter:drop-shadow(0 0 50px rgba(244,196,48,0.35)); }
+        .hero-line { width:70px;height:1px;background:linear-gradient(90deg,transparent,rgba(244,196,48,0.6),transparent);margin:22px auto; }
+        .hero-sub { font-size:clamp(13px,2.5vw,17px);color:rgba(244,196,48,0.55);letter-spacing:5px;animation:hFadeDown 1s ease both 0.4s; }
+        @keyframes hAppear { from{opacity:0;transform:scale(0.88) translateY(-24px)} to{opacity:1;transform:scale(1) translateY(0)} }
+        @keyframes hFadeDown { from{opacity:0;transform:translateY(-14px)} to{opacity:1;transform:translateY(0)} }
+        .scroll-hint { position:absolute;bottom:36px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:rgba(244,196,48,0.4);font-size:11px;letter-spacing:3px;text-transform:uppercase;animation:shBounce 2.5s ease-in-out infinite; }
+        .scroll-hint-arrow { width:16px;height:16px;border-right:2px solid rgba(244,196,48,0.4);border-bottom:2px solid rgba(244,196,48,0.4);transform:rotate(45deg); }
+        @keyframes shBounce { 0%,100%{transform:translateX(-50%) translateY(0);opacity:0.4} 50%{transform:translateX(-50%) translateY(10px);opacity:0.85} }
 
         .card {
             background: linear-gradient(135deg, rgba(15,15,40,0.97) 0%, rgba(10,10,25,0.99) 100%);
@@ -99,6 +110,23 @@
 <div class="moon"></div>
 <div class="stars" id="stars"></div>
 <div class="particles" id="particles"></div>
+
+<!-- Hero parallax -->
+<section class="hero" id="hero">
+    <div class="para-layer" id="paraDeep"></div>
+    <div class="para-layer" id="paraNear"></div>
+    <div class="hero-content" id="heroContent">
+        <div class="hero-eyebrow">תשפ״ו · ספירת העומר</div>
+        <div class="hero-big">ספירת<br>העומר</div>
+        <div class="hero-line"></div>
+        <div class="hero-sub">מפסח ועד שבועות</div>
+    </div>
+    <div class="scroll-hint" id="scrollHint">
+        <span>גלול</span>
+        <div class="scroll-hint-arrow"></div>
+    </div>
+</section>
+
 <div class="container">
     <div class="card">
         <div id="content"><p style="color:#f4c430;font-size:18px;">טוען...</p></div>
@@ -344,6 +372,56 @@ function createParticles() {
     }
 }
 createStars(); createParticles(); render();
+
+// ── Parallax Hero ──
+function initParallax() {
+    const hero = document.getElementById('hero');
+    const deep = document.getElementById('paraDeep');
+    const near = document.getElementById('paraNear');
+    const content = document.getElementById('heroContent');
+    const hint = document.getElementById('scrollHint');
+
+    // Seed parallax star layers
+    function seedLayer(el, count, maxSize, maxOpacity) {
+        for (let i = 0; i < count; i++) {
+            const s = document.createElement('div');
+            const sz = Math.random() * maxSize + 0.8;
+            s.style.cssText = `position:absolute;background:white;border-radius:50%;width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;opacity:${(Math.random()*maxOpacity).toFixed(2)}`;
+            el.appendChild(s);
+        }
+    }
+    seedLayer(deep, 90, 1.8, 0.55);  // slow, distant
+    seedLayer(near, 45, 3.5, 0.8);   // fast, close
+
+    // Gold dust particles in hero
+    for (let i = 0; i < 12; i++) {
+        const p = document.createElement('div');
+        const sz = Math.random() * 4 + 2;
+        p.style.cssText = `position:absolute;width:${sz}px;height:${sz}px;background:radial-gradient(circle,#f4c430,transparent);border-radius:50%;top:${Math.random()*100}%;left:${Math.random()*100}%;animation:float ${Math.random()*8+6}s ease-in-out infinite;animation-delay:${Math.random()*6}s;opacity:0;pointer-events:none;z-index:2`;
+        hero.appendChild(p);
+    }
+
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            requestAnimationFrame(() => {
+                const y = window.scrollY;
+                const h = hero.offsetHeight;
+                if (y <= h) {
+                    const pct = y / h;
+                    deep.style.transform    = `translateY(${y * 0.18}px)`;
+                    near.style.transform    = `translateY(${y * 0.42}px)`;
+                    content.style.transform = `translateY(${y * 0.58}px)`;
+                    content.style.opacity   = Math.max(0, 1 - pct * 2);
+                    hint.style.opacity      = Math.max(0, 1 - pct * 4);
+                }
+                ticking = false;
+            });
+            ticking = true;
+        }
+    }, { passive: true });
+}
+initParallax();
 </script>
 </body>
 </html>
