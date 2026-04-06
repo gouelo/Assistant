@@ -233,6 +233,58 @@
         #learningView { display: none; position: relative; z-index: 10; padding-top: 70px; }
         #omerView { padding-top: 54px; }
 
+        /* ── Jewish decorative background pattern ── */
+        body::after {
+            content: '';
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ctext x='40' y='48' font-size='20' text-anchor='middle' fill='rgba(244%2C196%2C48%2C0.03)'%3E✡%3C/text%3E%3C/svg%3E");
+            background-size: 80px 80px;
+            pointer-events: none; z-index: 0;
+        }
+        body.light::after {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ctext x='40' y='48' font-size='20' text-anchor='middle' fill='rgba(139%2C90%2C43%2C0.035)'%3E✡%3C/text%3E%3C/svg%3E");
+        }
+
+        /* ── Learning hero parallax ── */
+        .learn-hero {
+            height: 65vh; min-height: 360px;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            position: relative; overflow: hidden;
+        }
+        .lh-layer { position:absolute;top:0;left:0;width:100%;height:130%;pointer-events:none;will-change:transform; }
+        .lh-content { text-align:center;z-index:10;position:relative;padding:20px;will-change:transform,opacity; }
+        .lh-eyebrow { font-size:12px;letter-spacing:7px;color:var(--gold-dim);text-transform:uppercase;margin-bottom:18px;animation:hFadeDown 0.9s ease both; }
+        .lh-title { font-size:clamp(36px,9vw,80px);font-weight:900;line-height:1.1;background:linear-gradient(180deg,#fffde7 0%,#f4c430 55%,#c8860a 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:hAppear 1.1s ease both 0.15s;filter:drop-shadow(0 0 30px rgba(244,196,48,0.35)); }
+        body.light .lh-title { background:linear-gradient(180deg,#5c3d2e 0%,#b8860b 55%,#8b5a2b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
+        .lh-line { width:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(244,196,48,0.6),transparent);margin:18px auto; }
+        .lh-sub { font-size:clamp(12px,2vw,15px);color:var(--gold-dim);letter-spacing:6px;animation:hFadeDown 1s ease both 0.4s; }
+        .lh-scroll-hint { position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:rgba(244,196,48,0.4);font-size:11px;letter-spacing:3px;text-transform:uppercase;animation:shBounce 2.5s ease-in-out infinite; }
+
+        /* ── Track card watermark letter ── */
+        .track-card { overflow: visible; }
+        .track-watermark {
+            position: absolute; top: 10px; left: 16px;
+            font-size: 72px; font-weight: 900; line-height: 1;
+            color: var(--gold); opacity: 0.04;
+            pointer-events: none; user-select: none;
+            font-family: 'Frank Ruhl Libre', serif;
+            transition: opacity 0.3s;
+        }
+        .track-card:hover .track-watermark { opacity: 0.07; }
+
+        /* ── Decorative divider ── */
+        .jewish-divider {
+            display: flex; align-items: center; gap: 12px;
+            margin: 28px auto; max-width: 300px;
+        }
+        .jewish-divider::before, .jewish-divider::after {
+            content: ''; flex: 1; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold-dim));
+        }
+        .jewish-divider::after { background: linear-gradient(90deg, var(--gold-dim), transparent); }
+        .jewish-divider-star { color: var(--gold-dim); font-size: 14px; opacity: 0.6; }
+
         .learning-header {
             text-align: center; padding: 36px 20px 28px;
         }
@@ -352,7 +404,7 @@
         }
         .btn-toggle.active { background: rgba(244,196,48,0.2); color: #f4c430; border-color: rgba(244,196,48,0.5); }
         .text-content {
-            font-size: clamp(15px, 3.5vw, 18px);
+            font-size: var(--text-content-size, 18px);
             color: rgba(255,255,255,0.88);
             line-height: 2.1; direction: rtl;
         }
@@ -461,14 +513,28 @@
 
 <!-- ═══════════════════ LEARNING VIEW ═══════════════════ -->
 <div id="learningView">
-    <div class="learning-header">
-        <div class="learning-title">לימוד יומי</div>
-        <div class="learning-subtitle">תורה · משנה · נ״ך</div>
-    </div>
+
+    <!-- Learning hero parallax -->
+    <section class="learn-hero" id="learnHero">
+        <div class="lh-layer" id="lhDeep"></div>
+        <div class="lh-layer" id="lhNear"></div>
+        <div class="lh-content" id="lhContent">
+            <div class="lh-eyebrow">✡ לימוד יומי ✡</div>
+            <div class="lh-title">הלימוד היומי<br>של יואל</div>
+            <div class="lh-line"></div>
+            <div class="lh-sub">תּוֹרָה &nbsp;·&nbsp; מִשְׁנָה &nbsp;·&nbsp; נָ״ךְ</div>
+        </div>
+        <div class="lh-scroll-hint">
+            <span>גלול</span>
+            <div class="scroll-hint-arrow"></div>
+        </div>
+    </section>
+
     <div class="tracks-container">
 
         <!-- Track 1: Parasha -->
         <div class="track-card" id="parashaCard">
+            <div class="track-watermark">פ</div>
             <div class="track-header">
                 <div class="track-info">
                     <div class="track-icon">📜</div>
@@ -503,6 +569,7 @@
 
         <!-- Track 2: Mishna -->
         <div class="track-card" id="mishnaCard">
+            <div class="track-watermark">מ</div>
             <div class="track-header">
                 <div class="track-info">
                     <div class="track-icon">📚</div>
@@ -521,6 +588,11 @@
                 <button class="btn-back" onclick="goBackMishna()">← חזור לפרק הקודם</button>
             </div>
             <div class="text-panel" id="mishnaTextPanel">
+                <div class="font-size-controls">
+                    <span>גודל טקסט</span>
+                    <button class="btn-font" onclick="changeFontSize(-1)" title="הקטן">−</button>
+                    <button class="btn-font" onclick="changeFontSize(1)" title="הגדל">+</button>
+                </div>
                 <div class="text-panel-title">הטקסט</div>
                 <div id="mishnaTextContent"></div>
             </div>
@@ -528,6 +600,7 @@
 
         <!-- Track 3: Tanakh -->
         <div class="track-card" id="tanakhCard">
+            <div class="track-watermark">נ</div>
             <div class="track-header">
                 <div class="track-info">
                     <div class="track-icon">✡️</div>
@@ -546,6 +619,11 @@
                 <button class="btn-back" onclick="goBackTanakh()">← חזור לפרק הקודם</button>
             </div>
             <div class="text-panel" id="tanakhTextPanel">
+                <div class="font-size-controls">
+                    <span>גודל טקסט</span>
+                    <button class="btn-font" onclick="changeFontSize(-1)" title="הקטן">−</button>
+                    <button class="btn-font" onclick="changeFontSize(1)" title="הגדל">+</button>
+                </div>
                 <div class="text-panel-title">הטקסט</div>
                 <div id="tanakhTextContent"></div>
             </div>
@@ -1546,13 +1624,62 @@ function initParallax() {
 }
 initParallax();
 
+// ── Learning page hero parallax ──
+function initLearnHero() {
+    const hero = document.getElementById('learnHero');
+    const deep = document.getElementById('lhDeep');
+    const near = document.getElementById('lhNear');
+    const content = document.getElementById('lhContent');
+    if (!hero) return;
+
+    function seedLayer(el, count, maxSize, maxOpacity) {
+        for (let i = 0; i < count; i++) {
+            const s = document.createElement('div');
+            const sz = Math.random() * maxSize + 0.8;
+            s.style.cssText = `position:absolute;background:white;border-radius:50%;width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;opacity:${(Math.random()*maxOpacity).toFixed(2)}`;
+            el.appendChild(s);
+        }
+    }
+    seedLayer(deep, 70, 1.8, 0.5);
+    seedLayer(near, 35, 3, 0.75);
+
+    // Gold dust
+    for (let i = 0; i < 8; i++) {
+        const p = document.createElement('div');
+        const sz = Math.random() * 4 + 2;
+        p.style.cssText = `position:absolute;width:${sz}px;height:${sz}px;background:radial-gradient(circle,#f4c430,transparent);border-radius:50%;top:${Math.random()*100}%;left:${Math.random()*100}%;animation:float ${Math.random()*8+6}s ease-in-out infinite;animation-delay:${Math.random()*6}s;opacity:0;pointer-events:none;z-index:2`;
+        hero.appendChild(p);
+    }
+
+    // Parallax on scroll within learning view
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+        if (document.getElementById('learningView').style.display === 'none') return;
+        if (!ticking) {
+            requestAnimationFrame(() => {
+                const heroTop = hero.getBoundingClientRect().top + window.scrollY;
+                const y = window.scrollY - heroTop;
+                const h = hero.offsetHeight;
+                if (y >= -h && y <= h) {
+                    deep.style.transform    = `translateY(${y * 0.18}px)`;
+                    near.style.transform    = `translateY(${y * 0.42}px)`;
+                    content.style.transform = `translateY(${y * 0.55}px)`;
+                    content.style.opacity   = Math.max(0, 1 - (y / h) * 2);
+                }
+                ticking = false;
+            });
+            ticking = true;
+        }
+    }, { passive: true });
+}
+initLearnHero();
+
 // ── Font Size Control ──
 let currentFontSize = parseInt(localStorage.getItem('fontSize') || '18');
 function applyFontSize(size) {
     currentFontSize = Math.min(28, Math.max(14, size));
-    document.querySelectorAll('.text-content').forEach(el => {
-        el.style.fontSize = currentFontSize + 'px';
-    });
+    // Use CSS variable so dynamically created .text-content elements inherit it automatically
+    document.documentElement.style.setProperty('--text-content-size', currentFontSize + 'px');
     localStorage.setItem('fontSize', currentFontSize);
 }
 function changeFontSize(delta) { applyFontSize(currentFontSize + delta * 2); }
