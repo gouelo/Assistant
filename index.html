@@ -1222,7 +1222,8 @@ function renderParashaText() {
     const data = mode === 'heb' ? parashaFetched.heb : parashaFetched.targum;
     if (!data) { if (mode === 'targum') fetchParashaText(true); return; }
 
-    const verses = flattenText(mode === 'heb' ? (data.he || data.text) : (data.he || data.text));
+    // Strip taamim for Hebrew; Onkelos (Aramaic) has no taamim anyway
+    const verses = flattenText(mode === 'heb' ? (data.he || data.text) : (data.he || data.text), true);
     if (!verses || verses.length === 0) { el.innerHTML = '<div class="error-msg">הטקסט אינו זמין כרגע</div>'; return; }
 
     let html = '<div class="text-content">';
@@ -1407,7 +1408,7 @@ async function fetchTanakhText() {
 
 function renderTanakhText(data) {
     const el = document.getElementById('tanakhTextContent');
-    const verses = flattenText(data.he || data.text);
+    const verses = flattenText(data.he || data.text, true); // strip taamim
     if (!verses || verses.length === 0) { el.innerHTML = '<div class="error-msg">הטקסט אינו זמין כרגע</div>'; return; }
     let html = '<div class="text-content">';
     verses.forEach((v, i) => {
@@ -1448,14 +1449,19 @@ function goBackTanakh() {
 }
 
 // ── Utility helpers ──
-function flattenText(arr) {
+// Strip cantillation marks (טעמים U+0591–U+05AF) but keep vowels (ניקוד U+05B0–U+05C7)
+function stripTaamim(str) {
+    return str.replace(/[\u0591-\u05AF]/g, '');
+}
+
+function flattenText(arr, stripAccents = false) {
     if (!arr) return [];
-    if (typeof arr === 'string') return [arr];
+    if (typeof arr === 'string') return [stripAccents ? stripTaamim(arr) : arr];
     if (Array.isArray(arr)) {
         const flat = [];
         arr.forEach(item => {
-            if (typeof item === 'string') flat.push(item);
-            else if (Array.isArray(item)) flat.push(...flattenText(item));
+            if (typeof item === 'string') flat.push(stripAccents ? stripTaamim(item) : item);
+            else if (Array.isArray(item)) flat.push(...flattenText(item, stripAccents));
         });
         return flat;
     }
