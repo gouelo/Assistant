@@ -382,6 +382,61 @@
             .btn-primary, .btn-done { font-size: 13px; padding: 9px 15px; }
             .nav-btn { font-size: 14px; padding: 0 18px; }
         }
+
+        /* ── Light mode overrides for learning section ── */
+        body.light .text-content { color: rgba(44,24,16,0.88); }
+        body.light .text-content .verse-num { color: rgba(139,90,43,0.55); }
+        body.light .text-panel {
+            background: rgba(139,90,43,0.04);
+            border-color: rgba(139,90,43,0.15);
+        }
+        body.light .text-panel-title { color: rgba(92,61,46,0.55); }
+        body.light .btn-primary {
+            background: linear-gradient(135deg, rgba(139,90,43,0.1), rgba(184,134,11,0.15));
+            border-color: rgba(139,90,43,0.4);
+            color: #7a4f2a;
+        }
+        body.light .btn-primary:hover { background: rgba(139,90,43,0.18); border-color: rgba(139,90,43,0.6); }
+        body.light .btn-back { color: rgba(92,61,46,0.45); }
+        body.light .btn-back:hover { color: rgba(92,61,46,0.75); }
+        body.light .btn-toggle {
+            background: rgba(139,90,43,0.07);
+            border-color: rgba(139,90,43,0.2);
+            color: rgba(92,61,46,0.65);
+        }
+        body.light .btn-toggle.active {
+            background: rgba(139,90,43,0.18);
+            color: #7a4f2a;
+            border-color: rgba(139,90,43,0.45);
+        }
+        body.light .targum-text { color: rgba(44,24,16,0.6); }
+        body.light .spinner { color: rgba(139,90,43,0.6); }
+        body.light .spinner-ring {
+            border-color: rgba(139,90,43,0.2);
+            border-top-color: #b8860b;
+        }
+        body.light .error-msg { color: rgba(180,40,40,0.8); }
+        body.light .progress-bar-fill { background: linear-gradient(90deg, #8b5a2b, #b8860b); }
+
+        /* ── Font size control ── */
+        .font-size-controls {
+            display: flex; align-items: center; gap: 6px;
+            margin-bottom: 12px; justify-content: flex-end;
+        }
+        .font-size-controls span {
+            font-size: 11px; letter-spacing: 2px;
+            color: var(--gold-dim); text-transform: uppercase;
+            margin-left: 4px; transition: color 0.3s;
+        }
+        .btn-font {
+            background: var(--gold-faint); border: 1px solid var(--border);
+            color: var(--gold); font-family: 'Frank Ruhl Libre', serif;
+            font-weight: 700; border-radius: 8px;
+            width: 30px; height: 30px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; font-size: 14px; line-height: 1;
+        }
+        .btn-font:hover { background: rgba(244,196,48,0.2); }
     </style>
 </head>
 <body>
@@ -433,6 +488,11 @@
             </div>
             <div class="text-panel" id="parashaTextPanel">
                 <div class="text-panel-title">הטקסט</div>
+                <div class="font-size-controls">
+                    <span>גודל טקסט</span>
+                    <button class="btn-font" onclick="changeFontSize(-1)" title="הקטן">−</button>
+                    <button class="btn-font" onclick="changeFontSize(1)" title="הגדל">+</button>
+                </div>
                 <div class="text-panel-toggle" id="parashaToggleRow">
                     <button class="btn-toggle active" id="btnHeb" onclick="showParashaMode('heb')">עברית</button>
                     <button class="btn-toggle" id="btnTargum" onclick="showParashaMode('targum')">תרגום אונקלוס</button>
@@ -1141,22 +1201,17 @@ async function fetchParashaText(targumOnly = false) {
         if (cached) { parashaFetched.targum = JSON.parse(cached); renderParashaText(); return; }
         showSpinner('parashaTextContent');
         try {
-            const url = 'https://www.sefaria.org/api/texts/' + encodeURIComponent(ref) + '?lang=he&commentary=0&versionTitle=Onkelos+Onkelos';
+            // Sefaria: Onkelos texts are named "Onkelos Genesis 1:1-2:3" etc.
+            const onkelosRef = 'Onkelos ' + ref;
+            const url = 'https://www.sefaria.org/api/texts/' + encodeURIComponent(onkelosRef) + '?lang=he&commentary=0';
             const r = await fetch(url);
             const data = await r.json();
+            if (!data.he || (Array.isArray(data.he) && data.he.length === 0)) throw new Error('empty');
             parashaFetched.targum = data;
             sessionStorage.setItem(cacheKeyT, JSON.stringify(data));
             renderParashaText();
         } catch(e) {
-            // Fallback: fetch targum via a different approach
-            try {
-                const url2 = 'https://www.sefaria.org/api/texts/Onkelos_' + encodeURIComponent(ref) + '?lang=he&commentary=0';
-                const r2 = await fetch(url2);
-                const data2 = await r2.json();
-                parashaFetched.targum = data2;
-                sessionStorage.setItem(cacheKeyT, JSON.stringify(data2));
-                renderParashaText();
-            } catch(e2) { showError('parashaTextContent', 'תרגום אונקלוס אינו זמין כרגע.'); }
+            showError('parashaTextContent', 'תרגום אונקלוס אינו זמין כרגע.');
         }
     }
 }
@@ -1484,6 +1539,18 @@ function initParallax() {
     }, { passive: true });
 }
 initParallax();
+
+// ── Font Size Control ──
+let currentFontSize = parseInt(localStorage.getItem('fontSize') || '18');
+function applyFontSize(size) {
+    currentFontSize = Math.min(28, Math.max(14, size));
+    document.querySelectorAll('.text-content').forEach(el => {
+        el.style.fontSize = currentFontSize + 'px';
+    });
+    localStorage.setItem('fontSize', currentFontSize);
+}
+function changeFontSize(delta) { applyFontSize(currentFontSize + delta * 2); }
+applyFontSize(currentFontSize);
 
 // ── Light / Dark Mode ──
 function applyTheme(mode) {
