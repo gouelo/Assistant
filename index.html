@@ -233,16 +233,16 @@
         #learningView { display: none; position: relative; z-index: 10; padding-top: 70px; }
         #omerView { padding-top: 54px; }
 
-        /* ── Jewish decorative background pattern ── */
+        /* ── Subtle geometric background ── */
         body::after {
             content: '';
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ctext x='40' y='48' font-size='20' text-anchor='middle' fill='rgba(244%2C196%2C48%2C0.03)'%3E✡%3C/text%3E%3C/svg%3E");
-            background-size: 80px 80px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpolygon points='60,18 70,38 92,38 75,51 82,72 60,59 38,72 45,51 28,38 50,38' fill='none' stroke='rgba(244%2C196%2C48%2C0.025)' stroke-width='1'/%3E%3C/svg%3E");
+            background-size: 120px 120px;
             pointer-events: none; z-index: 0;
         }
         body.light::after {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ctext x='40' y='48' font-size='20' text-anchor='middle' fill='rgba(139%2C90%2C43%2C0.035)'%3E✡%3C/text%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpolygon points='60,18 70,38 92,38 75,51 82,72 60,59 38,72 45,51 28,38 50,38' fill='none' stroke='rgba(139%2C90%2C43%2C0.03)' stroke-width='1'/%3E%3C/svg%3E");
         }
 
         /* ── Learning hero parallax ── */
@@ -261,29 +261,16 @@
         .lh-sub { font-size:clamp(12px,2vw,15px);color:var(--gold-dim);letter-spacing:6px;animation:hFadeDown 1s ease both 0.4s; }
         .lh-scroll-hint { position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:rgba(244,196,48,0.4);font-size:11px;letter-spacing:3px;text-transform:uppercase;animation:shBounce 2.5s ease-in-out infinite; }
 
-        /* ── Track card watermark letter ── */
-        .track-card { overflow: visible; }
+        /* ── Track card letter watermark (very subtle) ── */
         .track-watermark {
-            position: absolute; top: 10px; left: 16px;
-            font-size: 72px; font-weight: 900; line-height: 1;
-            color: var(--gold); opacity: 0.04;
+            position: absolute; bottom: 14px; left: 18px;
+            font-size: 88px; font-weight: 900; line-height: 1;
+            color: var(--gold); opacity: 0.035;
             pointer-events: none; user-select: none;
             font-family: 'Frank Ruhl Libre', serif;
-            transition: opacity 0.3s;
+            transition: opacity 0.4s;
         }
-        .track-card:hover .track-watermark { opacity: 0.07; }
-
-        /* ── Decorative divider ── */
-        .jewish-divider {
-            display: flex; align-items: center; gap: 12px;
-            margin: 28px auto; max-width: 300px;
-        }
-        .jewish-divider::before, .jewish-divider::after {
-            content: ''; flex: 1; height: 1px;
-            background: linear-gradient(90deg, transparent, var(--gold-dim));
-        }
-        .jewish-divider::after { background: linear-gradient(90deg, var(--gold-dim), transparent); }
-        .jewish-divider-star { color: var(--gold-dim); font-size: 14px; opacity: 0.6; }
+        .track-card:hover .track-watermark { opacity: 0.065; }
 
         .learning-header {
             text-align: center; padding: 36px 20px 28px;
@@ -519,7 +506,7 @@
         <div class="lh-layer" id="lhDeep"></div>
         <div class="lh-layer" id="lhNear"></div>
         <div class="lh-content" id="lhContent">
-            <div class="lh-eyebrow">✡ לימוד יומי ✡</div>
+            <div class="lh-eyebrow">לימוד יומי</div>
             <div class="lh-title">הלימוד היומי<br>של יואל</div>
             <div class="lh-line"></div>
             <div class="lh-sub">תּוֹרָה &nbsp;·&nbsp; מִשְׁנָה &nbsp;·&nbsp; נָ״ךְ</div>
