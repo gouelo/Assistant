@@ -511,6 +511,39 @@
         .aramaic-example em { color: var(--gold); font-style: normal; font-weight: 600; }
         .aramaic-day-count { font-size: 11px; color: var(--text-muted); margin-top: 14px; letter-spacing: 1px; }
 
+        /* ── TTS Controls ── */
+        .tts-controls {
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 12px; flex-wrap: wrap;
+        }
+        .btn-tts {
+            background: linear-gradient(135deg, rgba(244,196,48,0.12), rgba(200,134,10,0.18));
+            border: 1px solid rgba(244,196,48,0.35);
+            color: #f4c430; font-family: 'Frank Ruhl Libre', serif;
+            font-size: 13px; font-weight: 600;
+            padding: 7px 16px; border-radius: 10px; cursor: pointer;
+            transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+        }
+        .btn-tts:hover { background: rgba(244,196,48,0.22); border-color: rgba(244,196,48,0.6); }
+        .btn-tts:disabled { opacity: 0.55; cursor: default; }
+        .btn-tts-stop {
+            background: none;
+            border: 1px solid rgba(244,196,48,0.2);
+            color: rgba(244,196,48,0.55); font-family: 'Frank Ruhl Libre', serif;
+            font-size: 12px; padding: 7px 12px; border-radius: 10px;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .btn-tts-stop:hover { border-color: rgba(244,196,48,0.5); color: rgba(244,196,48,0.85); }
+        .tts-chunk-progress {
+            font-size: 11px; color: rgba(244,196,48,0.4); letter-spacing: 1px;
+        }
+        body.light .btn-tts {
+            background: linear-gradient(135deg, rgba(139,90,43,0.1), rgba(184,134,11,0.15));
+            border-color: rgba(139,90,43,0.35); color: #7a4f2a;
+        }
+        body.light .btn-tts:hover { background: rgba(139,90,43,0.2); }
+        body.light .btn-tts-stop { border-color: rgba(139,90,43,0.25); color: rgba(92,61,46,0.6); }
+
         /* ── Font size control ── */
         .font-size-controls {
             display: flex; align-items: center; gap: 6px;
@@ -600,6 +633,11 @@
                     <button class="btn-font" onclick="changeFontSize(-1)" title="הקטן">−</button>
                     <button class="btn-font" onclick="changeFontSize(1)" title="הגדל">+</button>
                 </div>
+                <div class="tts-controls">
+                    <button class="btn-tts" id="parashaTtsBtn" onclick="speakText('parashaTextContent', this)">🔊 הקרא</button>
+                    <button class="btn-tts-stop" id="parashaTtsStop" onclick="stopTTS()" style="display:none">⏹ עצור</button>
+                    <span class="tts-chunk-progress" id="parashaTtsProgress"></span>
+                </div>
                 <div class="text-panel-toggle" id="parashaToggleRow">
                     <button class="btn-toggle active" id="btnHeb" onclick="showParashaMode('heb')">עברית</button>
                     <button class="btn-toggle" id="btnTargum" onclick="showParashaMode('targum')">תרגום אונקלוס</button>
@@ -634,6 +672,11 @@
                     <button class="btn-font" onclick="changeFontSize(-1)" title="הקטן">−</button>
                     <button class="btn-font" onclick="changeFontSize(1)" title="הגדל">+</button>
                 </div>
+                <div class="tts-controls">
+                    <button class="btn-tts" id="mishnaTtsBtn" onclick="speakText('mishnaTextContent', this)">🔊 הקרא</button>
+                    <button class="btn-tts-stop" id="mishnaTtsStop" onclick="stopTTS()" style="display:none">⏹ עצור</button>
+                    <span class="tts-chunk-progress" id="mishnaTtsProgress"></span>
+                </div>
                 <div class="text-panel-title">הטקסט</div>
                 <div id="mishnaTextContent"></div>
             </div>
@@ -664,6 +707,11 @@
                     <span>גודל טקסט</span>
                     <button class="btn-font" onclick="changeFontSize(-1)" title="הקטן">−</button>
                     <button class="btn-font" onclick="changeFontSize(1)" title="הגדל">+</button>
+                </div>
+                <div class="tts-controls">
+                    <button class="btn-tts" id="tanakhTtsBtn" onclick="speakText('tanakhTextContent', this)">🔊 הקרא</button>
+                    <button class="btn-tts-stop" id="tanakhTtsStop" onclick="stopTTS()" style="display:none">⏹ עצור</button>
+                    <span class="tts-chunk-progress" id="tanakhTtsProgress"></span>
                 </div>
                 <div class="text-panel-title">הטקסט</div>
                 <div id="tanakhTextContent"></div>
@@ -1854,6 +1902,125 @@ function toggleTheme() {
 }
 // Apply saved preference on load
 applyTheme(localStorage.getItem('colorScheme') || 'dark');
+
+// ═══════════════════════════════════════════
+// Google Cloud Text-to-Speech
+// ═══════════════════════════════════════════
+const TTS_API_KEY = 'AIzaSyAC9hS-3raORdI6Qt-XayXRdx3kvoqe8ew';
+const TTS_VOICE_NAME = 'he-IL-Neural2-D'; // Natural Hebrew Neural2 voice
+const TTS_CHUNK_SIZE = 2000; // chars per chunk (safe under 5000 byte limit)
+
+let ttsAudio = null;
+let ttsCurrentBtnId = null;
+let ttsChunks = [];
+let ttsChunkIdx = 0;
+let ttsStopped = false;
+
+function extractTTSText(elId) {
+    const el = document.getElementById(elId);
+    if (!el) return '';
+    return (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim();
+}
+
+function chunkText(text, size) {
+    const chunks = [];
+    let start = 0;
+    while (start < text.length) {
+        let end = start + size;
+        if (end >= text.length) { chunks.push(text.slice(start)); break; }
+        let breakPoint = text.lastIndexOf(' ', end);
+        if (breakPoint <= start) breakPoint = end;
+        chunks.push(text.slice(start, breakPoint));
+        start = breakPoint + 1;
+    }
+    return chunks.filter(c => c.trim().length > 0);
+}
+
+async function fetchTTSAudio(text) {
+    const res = await fetch(
+        `https://texttospeech.googleapis.com/v1/text:synthesize?key=${TTS_API_KEY}`,
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                input: { text },
+                voice: { languageCode: 'he-IL', name: TTS_VOICE_NAME },
+                audioConfig: {
+                    audioEncoding: 'MP3',
+                    speakingRate: 0.92,
+                    pitch: -1.0,
+                    effectsProfileId: ['headphone-class-device']
+                }
+            })
+        }
+    );
+    const data = await res.json();
+    if (!data.audioContent) throw new Error(data.error?.message || 'אין תוצאה מה-API');
+    return 'data:audio/mp3;base64,' + data.audioContent;
+}
+
+async function playNextChunk() {
+    if (ttsStopped || ttsChunkIdx >= ttsChunks.length) { resetTTSUI(); return; }
+    const btn = document.getElementById(ttsCurrentBtnId);
+    const track = ttsCurrentBtnId.replace('TtsBtn', '');
+    const progressEl = document.getElementById(track + 'TtsProgress');
+    const stopEl = document.getElementById(track + 'TtsStop');
+    if (progressEl && ttsChunks.length > 1)
+        progressEl.textContent = `${ttsChunkIdx + 1} / ${ttsChunks.length}`;
+    try {
+        const audioUrl = await fetchTTSAudio(ttsChunks[ttsChunkIdx]);
+        if (ttsStopped) return;
+        ttsAudio = new Audio(audioUrl);
+        ttsAudio.onended = () => { ttsChunkIdx++; playNextChunk(); };
+        ttsAudio.onerror = () => resetTTSUI();
+        await ttsAudio.play();
+        if (btn) { btn.innerHTML = '⏸ השהה'; btn.disabled = false; }
+        if (stopEl) stopEl.style.display = '';
+    } catch(e) {
+        console.error('TTS שגיאה:', e);
+        resetTTSUI();
+    }
+}
+
+async function speakText(contentElId, btnEl) {
+    // Pause if currently playing this track
+    if (ttsCurrentBtnId === btnEl.id && ttsAudio && !ttsAudio.paused) {
+        ttsAudio.pause(); btnEl.innerHTML = '▶ המשך'; return;
+    }
+    // Resume if paused on same track
+    if (ttsCurrentBtnId === btnEl.id && ttsAudio && ttsAudio.paused) {
+        await ttsAudio.play(); btnEl.innerHTML = '⏸ השהה'; return;
+    }
+    // Stop previous, start new
+    stopTTS(false);
+    const text = extractTTSText(contentElId);
+    if (!text || text.length < 3) return;
+    ttsCurrentBtnId = btnEl.id;
+    ttsChunks = chunkText(text, TTS_CHUNK_SIZE);
+    ttsChunkIdx = 0;
+    ttsStopped = false;
+    btnEl.innerHTML = '⏳ טוען...';
+    btnEl.disabled = true;
+    await playNextChunk();
+}
+
+function stopTTS(reset = true) {
+    ttsStopped = true;
+    if (ttsAudio) { ttsAudio.pause(); ttsAudio.src = ''; ttsAudio = null; }
+    if (reset) resetTTSUI();
+}
+
+function resetTTSUI() {
+    ['parasha', 'mishna', 'tanakh'].forEach(t => {
+        const btn = document.getElementById(t + 'TtsBtn');
+        const stop = document.getElementById(t + 'TtsStop');
+        const prog = document.getElementById(t + 'TtsProgress');
+        if (btn) { btn.innerHTML = '🔊 הקרא'; btn.disabled = false; }
+        if (stop) stop.style.display = 'none';
+        if (prog) prog.textContent = '';
+    });
+    ttsCurrentBtnId = null;
+}
 </script>
 </body>
 </html>
