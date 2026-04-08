@@ -1907,7 +1907,7 @@ applyTheme(localStorage.getItem('colorScheme') || 'dark');
 // Google Cloud Text-to-Speech
 // ═══════════════════════════════════════════
 const TTS_API_KEY = 'AIzaSyAC9hS-3raORdI6Qt-XayXRdx3kvoqe8ew';
-const TTS_VOICE_NAME = 'he-IL-Neural2-D'; // Natural Hebrew Neural2 voice
+const TTS_VOICE_NAME = 'he-IL-Wavenet-D'; // Natural male Hebrew WaveNet voice
 const TTS_CHUNK_SIZE = 2000; // chars per chunk (safe under 5000 byte limit)
 
 let ttsAudio = null;
@@ -1978,6 +1978,8 @@ async function playNextChunk() {
         if (stopEl) stopEl.style.display = '';
     } catch(e) {
         console.error('TTS שגיאה:', e);
+        const prog = document.getElementById(ttsCurrentBtnId ? ttsCurrentBtnId.replace('TtsBtn','TtsProgress') : '');
+        if (prog) prog.textContent = '❌ שגיאה: ' + (e.message || 'בדוק חיבור');
         resetTTSUI();
     }
 }
@@ -1994,7 +1996,10 @@ async function speakText(contentElId, btnEl) {
     // Stop previous, start new
     stopTTS(false);
     const text = extractTTSText(contentElId);
-    if (!text || text.length < 3) return;
+    if (!text || text.length < 3) {
+        alert('יש ללחוץ תחילה על "📖 המשך ללמוד" כדי לטעון את הטקסט');
+        return;
+    }
     ttsCurrentBtnId = btnEl.id;
     ttsChunks = chunkText(text, TTS_CHUNK_SIZE);
     ttsChunkIdx = 0;
