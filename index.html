@@ -544,6 +544,26 @@
         body.light .btn-tts:hover { background: rgba(139,90,43,0.2); }
         body.light .btn-tts-stop { border-color: rgba(139,90,43,0.25); color: rgba(92,61,46,0.6); }
 
+        /* ── TTS Word Highlight ── */
+        .tts-word {
+            cursor: pointer;
+            border-radius: 3px;
+            padding: 1px 1px;
+            transition: background 0.15s;
+            display: inline;
+        }
+        .tts-word:hover { background: rgba(244,196,48,0.18); }
+        .tts-word.tts-active {
+            background: rgba(244,196,48,0.38);
+            color: #fff;
+            border-radius: 3px;
+        }
+        body.light .tts-word:hover { background: rgba(139,90,43,0.12); }
+        body.light .tts-word.tts-active {
+            background: rgba(184,134,11,0.3);
+            color: #2c1810;
+        }
+
         /* ── Font size control ── */
         .font-size-controls {
             display: flex; align-items: center; gap: 6px;
@@ -1904,118 +1924,202 @@ function toggleTheme() {
 applyTheme(localStorage.getItem('colorScheme') || 'dark');
 
 // ═══════════════════════════════════════════
-// Google Cloud Text-to-Speech
+// Google Cloud TTS v2 — WaveNet + Word Highlight + Click-to-Start
 // ═══════════════════════════════════════════
 const TTS_API_KEY = 'AIzaSyAC9hS-3raORdI6Qt-XayXRdx3kvoqe8ew';
-const TTS_VOICE_NAME = 'he-IL-Wavenet-D'; // Natural male Hebrew WaveNet voice
-const TTS_CHUNK_SIZE = 2000; // chars per chunk (safe under 5000 byte limit)
+const TTS_VOICE = 'he-IL-Wavenet-D';
+const TTS_WORDS_PER_CHUNK = 110;
 
 let ttsAudio = null;
 let ttsCurrentBtnId = null;
-let ttsChunks = [];
-let ttsChunkIdx = 0;
+let ttsContentElId = null;
 let ttsStopped = false;
+let ttsHighlightTimer = null;
+let ttsStartWordIdx = 0;
 
-function extractTTSText(elId) {
-    const el = document.getElementById(elId);
-    if (!el) return '';
-    return (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim();
-}
-
-function chunkText(text, size) {
-    const chunks = [];
-    let start = 0;
-    while (start < text.length) {
-        let end = start + size;
-        if (end >= text.length) { chunks.push(text.slice(start)); break; }
-        let breakPoint = text.lastIndexOf(' ', end);
-        if (breakPoint <= start) breakPoint = end;
-        chunks.push(text.slice(start, breakPoint));
-        start = breakPoint + 1;
+// Wrap every word in a <span class="tts-word"> for highlighting & click
+function wrapWordsForTTS(elId) {
+    const container = document.getElementById(elId);
+    if (!container || container.dataset.ttsWrapped === '1') return;
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+    const textNodes = [];
+    let node;
+    while ((node = walker.nextNode())) {
+        // Skip verse numbers
+        if (node.parentElement.closest('.verse-num')) continue;
+        if (node.textContent.trim()) textNodes.push(node);
     }
-    return chunks.filter(c => c.trim().length > 0);
+    let idx = 0;
+    for (const tn of textNodes) {
+        const parts = tn.textContent.split(/(\s+)/);
+        const frag = document.createDocumentFragment();
+        for (const part of parts) {
+            if (/^\s*$/.test(part)) {
+                frag.appendChild(document.createTextNode(part || ' '));
+            } else {
+                const sp = document.createElement('span');
+                sp.className = 'tts-word';
+                sp.dataset.idx = idx++;
+                sp.textContent = part;
+                frag.appendChild(sp);
+            }
+        }
+        tn.parentNode.replaceChild(frag, tn);
+    }
+    container.dataset.ttsWrapped = '1';
+    // Event delegation for word clicks
+    container.addEventListener('click', function(e) {
+        const sp = e.target.closest('.tts-word');
+        if (!sp) return;
+        startFromWordIdx(elId, parseInt(sp.dataset.idx));
+    });
 }
 
-async function fetchTTSAudio(text) {
+// Auto-wrap when text content changes (after Sefaria fetch)
+['parashaTextContent','mishnaTextContent','tanakhTextContent'].forEach(elId => {
+    const obs = new MutationObserver(() => {
+        const el = document.getElementById(elId);
+        if (!el || el.dataset.ttsWrapped === '1') return;
+        if (el.querySelector('.spinner') || el.querySelector('.error-msg')) return;
+        if ((el.innerText || '').trim().length > 10) {
+            setTimeout(() => wrapWordsForTTS(elId), 80);
+        }
+    });
+    const el = document.getElementById(elId);
+    if (el) obs.observe(el, { childList: true });
+});
+
+function chunkWordArray(words, size) {
+    const chunks = [];
+    for (let i = 0; i < words.length; i += size) chunks.push(words.slice(i, i + size));
+    return chunks;
+}
+
+async function fetchChunkWithTimepoints(words) {
+    const ssml = '<speak>' + words.map((w, i) => `<mark name="${i}"/>${w}`).join(' ') + '</speak>';
     const res = await fetch(
-        `https://texttospeech.googleapis.com/v1/text:synthesize?key=${TTS_API_KEY}`,
+        `https://texttospeech.googleapis.com/v1beta1/text:synthesize?key=${TTS_API_KEY}`,
         {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                input: { text },
-                voice: { languageCode: 'he-IL', name: TTS_VOICE_NAME },
-                audioConfig: {
-                    audioEncoding: 'MP3',
-                    speakingRate: 0.92,
-                    pitch: -1.0,
-                    effectsProfileId: ['headphone-class-device']
-                }
+                input: { ssml },
+                voice: { languageCode: 'he-IL', name: TTS_VOICE },
+                audioConfig: { audioEncoding: 'MP3', speakingRate: 0.92, pitch: -1.0 },
+                enableTimePointing: ['SSML_MARK']
             })
         }
     );
     const data = await res.json();
     if (!data.audioContent) throw new Error(data.error?.message || 'אין תוצאה מה-API');
-    return 'data:audio/mp3;base64,' + data.audioContent;
+    return { audioUrl: 'data:audio/mp3;base64,' + data.audioContent, timepoints: data.timepoints || [] };
 }
 
-async function playNextChunk() {
-    if (ttsStopped || ttsChunkIdx >= ttsChunks.length) { resetTTSUI(); return; }
-    const btn = document.getElementById(ttsCurrentBtnId);
-    const track = ttsCurrentBtnId.replace('TtsBtn', '');
-    const progressEl = document.getElementById(track + 'TtsProgress');
-    const stopEl = document.getElementById(track + 'TtsStop');
-    if (progressEl && ttsChunks.length > 1)
-        progressEl.textContent = `${ttsChunkIdx + 1} / ${ttsChunks.length}`;
-    try {
-        const audioUrl = await fetchTTSAudio(ttsChunks[ttsChunkIdx]);
-        if (ttsStopped) return;
-        ttsAudio = new Audio(audioUrl);
-        ttsAudio.onended = () => { ttsChunkIdx++; playNextChunk(); };
-        ttsAudio.onerror = () => resetTTSUI();
-        await ttsAudio.play();
-        if (btn) { btn.innerHTML = '⏸ השהה'; btn.disabled = false; }
-        if (stopEl) stopEl.style.display = '';
-    } catch(e) {
-        console.error('TTS שגיאה:', e);
-        const prog = document.getElementById(ttsCurrentBtnId ? ttsCurrentBtnId.replace('TtsBtn','TtsProgress') : '');
-        if (prog) prog.textContent = '❌ שגיאה: ' + (e.message || 'בדוק חיבור');
-        resetTTSUI();
-    }
+function startHighlighting(audio, timepoints, globalOffset) {
+    clearInterval(ttsHighlightTimer);
+    const markers = timepoints.map(tp => ({
+        t: tp.timeSeconds,
+        idx: parseInt(tp.markName) + globalOffset
+    })).sort((a, b) => a.t - b.t);
+    const container = document.getElementById(ttsContentElId);
+    ttsHighlightTimer = setInterval(() => {
+        if (!ttsAudio || ttsAudio.paused) return;
+        const now = ttsAudio.currentTime;
+        let cur = -1;
+        for (let i = markers.length - 1; i >= 0; i--) {
+            if (markers[i].t <= now) { cur = markers[i].idx; break; }
+        }
+        if (cur < 0) return;
+        container.querySelectorAll('.tts-word.tts-active').forEach(s => s.classList.remove('tts-active'));
+        const sp = container.querySelector(`.tts-word[data-idx="${cur}"]`);
+        if (sp) { sp.classList.add('tts-active'); sp.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+    }, 50);
 }
 
-async function speakText(contentElId, btnEl) {
-    // Pause if currently playing this track
-    if (ttsCurrentBtnId === btnEl.id && ttsAudio && !ttsAudio.paused) {
-        ttsAudio.pause(); btnEl.innerHTML = '▶ המשך'; return;
-    }
-    // Resume if paused on same track
-    if (ttsCurrentBtnId === btnEl.id && ttsAudio && ttsAudio.paused) {
-        await ttsAudio.play(); btnEl.innerHTML = '⏸ השהה'; return;
-    }
-    // Stop previous, start new
+async function startFromWordIdx(elId, wordIdx) {
     stopTTS(false);
-    const text = extractTTSText(contentElId);
-    if (!text || text.length < 3) {
+    wrapWordsForTTS(elId);
+
+    const container = document.getElementById(elId);
+    const allSpans = Array.from(container.querySelectorAll('.tts-word'));
+    if (allSpans.length === 0) {
         alert('יש ללחוץ תחילה על "📖 המשך ללמוד" כדי לטעון את הטקסט');
         return;
     }
-    ttsCurrentBtnId = btnEl.id;
-    ttsChunks = chunkText(text, TTS_CHUNK_SIZE);
-    ttsChunkIdx = 0;
+
+    ttsContentElId = elId;
+    ttsStartWordIdx = wordIdx;
     ttsStopped = false;
-    btnEl.innerHTML = '⏳ טוען...';
-    btnEl.disabled = true;
-    await playNextChunk();
+    ttsCurrentBtnId = elId.replace('TextContent', 'TtsBtn');
+
+    const words = allSpans.slice(wordIdx).map(s => s.textContent);
+    const chunks = chunkWordArray(words, TTS_WORDS_PER_CHUNK);
+    let chunkOffset = 0;
+
+    const btn = document.getElementById(ttsCurrentBtnId);
+    const track = ttsCurrentBtnId.replace('TtsBtn', '');
+    const stopEl = document.getElementById(track + 'TtsStop');
+    const prog = document.getElementById(track + 'TtsProgress');
+
+    const playChunk = async (idx) => {
+        if (ttsStopped || idx >= chunks.length) {
+            clearInterval(ttsHighlightTimer);
+            container.querySelectorAll('.tts-word.tts-active').forEach(s => s.classList.remove('tts-active'));
+            resetTTSUI();
+            return;
+        }
+        if (btn) { btn.innerHTML = '⏳ טוען...'; btn.disabled = true; }
+        if (prog && chunks.length > 1) prog.textContent = `${idx + 1}/${chunks.length}`;
+        try {
+            const { audioUrl, timepoints } = await fetchChunkWithTimepoints(chunks[idx]);
+            if (ttsStopped) return;
+            ttsAudio = new Audio(audioUrl);
+            ttsAudio.oncanplay = () => {
+                if (btn) { btn.innerHTML = '⏸ השהה'; btn.disabled = false; }
+                if (stopEl) stopEl.style.display = '';
+                startHighlighting(ttsAudio, timepoints, wordIdx + chunkOffset);
+            };
+            ttsAudio.onended = () => {
+                clearInterval(ttsHighlightTimer);
+                chunkOffset += chunks[idx].length;
+                playChunk(idx + 1);
+            };
+            ttsAudio.onerror = () => { clearInterval(ttsHighlightTimer); resetTTSUI(); };
+            await ttsAudio.play();
+        } catch(e) {
+            console.error('TTS שגיאה:', e);
+            if (prog) prog.textContent = '❌ ' + (e.message || 'שגיאה');
+            clearInterval(ttsHighlightTimer);
+            resetTTSUI();
+        }
+    };
+
+    await playChunk(0);
+}
+
+async function speakText(contentElId, btnEl) {
+    // Pause if playing
+    if (ttsCurrentBtnId === btnEl.id && ttsAudio && !ttsAudio.paused) {
+        ttsAudio.pause(); clearInterval(ttsHighlightTimer); btnEl.innerHTML = '▶ המשך'; return;
+    }
+    // Resume if paused
+    if (ttsCurrentBtnId === btnEl.id && ttsAudio && ttsAudio.paused) {
+        await ttsAudio.play(); btnEl.innerHTML = '⏸ השהה'; return;
+    }
+    await startFromWordIdx(contentElId, 0);
 }
 
 function stopTTS(reset = true) {
     ttsStopped = true;
+    clearInterval(ttsHighlightTimer);
     if (ttsAudio) { ttsAudio.pause(); ttsAudio.src = ''; ttsAudio = null; }
+    document.querySelectorAll('.tts-word.tts-active').forEach(s => s.classList.remove('tts-active'));
     if (reset) resetTTSUI();
 }
 
 function resetTTSUI() {
+    clearInterval(ttsHighlightTimer);
+    document.querySelectorAll('.tts-word.tts-active').forEach(s => s.classList.remove('tts-active'));
     ['parasha', 'mishna', 'tanakh'].forEach(t => {
         const btn = document.getElementById(t + 'TtsBtn');
         const stop = document.getElementById(t + 'TtsStop');
@@ -2025,6 +2129,7 @@ function resetTTSUI() {
         if (prog) prog.textContent = '';
     });
     ttsCurrentBtnId = null;
+    ttsContentElId = null;
 }
 </script>
 </body>
