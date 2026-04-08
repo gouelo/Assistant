@@ -663,6 +663,9 @@
                     <button class="btn-toggle" id="btnTargum" onclick="showParashaMode('targum')">תרגום אונקלוס</button>
                 </div>
                 <div id="parashaTextContent"></div>
+                <div style="text-align:center; margin-top:18px;">
+                    <button class="btn-done" id="parashaDoneBtnBottom" onclick="markParashaDone()">✓ סיימתי</button>
+                </div>
             </div>
         </div>
 
@@ -699,6 +702,9 @@
                 </div>
                 <div class="text-panel-title">הטקסט</div>
                 <div id="mishnaTextContent"></div>
+                <div style="text-align:center; margin-top:18px;">
+                    <button class="btn-done" id="mishnaDoneBtnBottom" onclick="markMishnaDone()">✓ סיימתי</button>
+                </div>
             </div>
         </div>
 
@@ -735,6 +741,9 @@
                 </div>
                 <div class="text-panel-title">הטקסט</div>
                 <div id="tanakhTextContent"></div>
+                <div style="text-align:center; margin-top:18px;">
+                    <button class="btn-done" id="tanakhDoneBtnBottom" onclick="markTanakhDone()">✓ סיימתי</button>
+                </div>
             </div>
         </div>
 
@@ -1448,6 +1457,7 @@ function markParashaDone() {
     saveProgress(prog);
     updateParashaUI();
     flashDone('parashaDoneBtn');
+    flashDone('parashaDoneBtnBottom');
 }
 
 function goBackParasha() {
@@ -1540,6 +1550,7 @@ function markMishnaDone() {
     saveProgress(prog);
     updateMishnaUI();
     flashDone('mishnaDoneBtn');
+    flashDone('mishnaDoneBtnBottom');
 }
 
 function goBackMishna() {
@@ -1630,6 +1641,7 @@ function markTanakhDone() {
     saveProgress(prog);
     updateTanakhUI();
     flashDone('tanakhDoneBtn');
+    flashDone('tanakhDoneBtnBottom');
 }
 
 function goBackTanakh() {
@@ -2090,8 +2102,17 @@ async function startFromWordIdx(elId, wordIdx) {
             ttsAudio = audio;
 
             await new Promise((resolve, reject) => {
-                audio.addEventListener('ended', resolve, { once: true });
-                audio.addEventListener('error', () => reject(new Error('שגיאת השמעה')), { once: true });
+                let done = false;
+                const finish = () => { if (!done) { done = true; resolve(); } };
+                audio.addEventListener('ended', finish, { once: true });
+                audio.addEventListener('error', () => { if (!done) { done = true; reject(new Error('שגיאת השמעה')); } }, { once: true });
+                // iOS fallback: 'ended' sometimes doesn't fire on data: URLs
+                audio.addEventListener('timeupdate', function iosCheck() {
+                    if (audio.duration > 0 && audio.currentTime >= audio.duration - 0.15) {
+                        audio.removeEventListener('timeupdate', iosCheck);
+                        setTimeout(finish, 250);
+                    }
+                });
                 audio.play().then(() => {
                     if (myId !== ttsSessionId) { audio.pause(); resolve(); return; }
                     if (btn)    { btn.innerHTML = '⏸ השהה'; btn.disabled = false; }
