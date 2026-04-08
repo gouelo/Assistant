@@ -1995,8 +1995,16 @@ function chunkWordArray(words, size) {
     return chunks;
 }
 
+// Replace divine names with traditional Jewish pronunciation
+function preprocessWordForTTS(word) {
+    const stripped = word.replace(/[\u0591-\u05C7]/g, ''); // strip nikud + cantillation
+    if (stripped === 'יהוה' || stripped === "ה'" || stripped === 'ה׳') return 'אדוניי';
+    return word;
+}
+
 async function fetchChunkWithTimepoints(words) {
-    const ssml = '<speak>' + words.map((w, i) => `<mark name="${i}"/>${w}`).join(' ') + '</speak>';
+    const processed = words.map(preprocessWordForTTS);
+    const ssml = '<speak>' + processed.map((w, i) => `<mark name="${i}"/>${w}`).join(' ') + '</speak>';
     const res = await fetch(
         `https://texttospeech.googleapis.com/v1beta1/text:synthesize?key=${TTS_API_KEY}`,
         {
@@ -2074,11 +2082,6 @@ async function startFromWordIdx(elId, wordIdx) {
             const { audioUrl, timepoints } = await fetchChunkWithTimepoints(chunks[idx]);
             if (ttsStopped) return;
             ttsAudio = new Audio(audioUrl);
-            ttsAudio.oncanplay = () => {
-                if (btn) { btn.innerHTML = '⏸ השהה'; btn.disabled = false; }
-                if (stopEl) stopEl.style.display = '';
-                startHighlighting(ttsAudio, timepoints, wordIdx + chunkOffset);
-            };
             ttsAudio.onended = () => {
                 clearInterval(ttsHighlightTimer);
                 chunkOffset += chunks[idx].length;
@@ -2086,6 +2089,9 @@ async function startFromWordIdx(elId, wordIdx) {
             };
             ttsAudio.onerror = () => { clearInterval(ttsHighlightTimer); resetTTSUI(); };
             await ttsAudio.play();
+            if (btn) { btn.innerHTML = '⏸ השהה'; btn.disabled = false; }
+            if (stopEl) stopEl.style.display = '';
+            startHighlighting(ttsAudio, timepoints, wordIdx + chunkOffset);
         } catch(e) {
             console.error('TTS שגיאה:', e);
             if (prog) prog.textContent = '❌ ' + (e.message || 'שגיאה');
