@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>לימוד יומי יואל</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -230,8 +231,8 @@
         .theme-toggle:hover { background: var(--gold-faint); border-color: var(--gold); }
 
         /* ── Learning View ── */
-        #learningView { display: none; position: relative; z-index: 10; padding-top: 70px; }
-        #omerView { padding-top: 54px; }
+        #learningView { position: relative; z-index: 10; padding-top: 70px; }
+        #omerView { display: none; padding-top: 54px; }
 
         /* ── Subtle geometric background ── */
         body::after {
@@ -413,13 +414,45 @@
 
         .error-msg { color: rgba(255,100,100,0.8); font-size: 14px; padding: 10px 0; text-align: center; }
 
-        /* Targum toggle */
+        /* Verse pair: Hebrew + Targum interleaved */
+        .verse-pair { margin-bottom: 18px; }
+        .verse-pair .heb-verse { display: block; margin-bottom: 4px; }
+        .verse-pair .targum-verse { display: block; color: rgba(255,255,255,0.52); font-style: italic; font-size: 0.91em; line-height: 1.85; padding-right: 22px; border-right: 2px solid rgba(244,196,48,0.2); direction: rtl; }
         .targum-text { color: rgba(255,255,255,0.55); font-style: italic; font-size: 0.92em; line-height: 1.9; margin-top: 8px; direction: rtl; }
 
         @media(max-width:480px){
             .track-card { padding: 20px 16px 18px; }
             .btn-primary, .btn-done { font-size: 13px; padding: 9px 15px; }
             .nav-btn { font-size: 14px; padding: 0 18px; }
+        }
+
+        /* ── Desktop Layout ── */
+        @media(min-width: 900px){
+            .container { max-width: 860px; padding: 32px; }
+            .tracks-container {
+                max-width: 880px;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 24px;
+                padding: 0 24px 80px;
+            }
+            .card { padding: 56px 52px; }
+            .learning-header { padding: 44px 24px 36px; }
+            .learning-title { font-size: 48px; }
+            .track-card { padding: 32px 28px 26px; }
+            .track-title { font-size: 20px; }
+            .track-subtitle { font-size: 14px; }
+            .torah-body p { font-size: 17px; }
+            .nav-btn { font-size: 16px; padding: 0 32px; }
+            .top-nav { height: 60px; }
+            #omerView { padding-top: 60px; }
+            #learningView { padding-top: 76px; }
+        }
+
+        @media(min-width: 1280px){
+            .container { max-width: 1000px; }
+            .tracks-container { max-width: 1040px; gap: 28px; }
+            .card { padding: 64px 64px; }
         }
 
         /* ── Light mode overrides for learning section ── */
@@ -455,6 +488,7 @@
             border-color: rgba(139,90,43,0.45);
         }
         body.light .targum-text { color: rgba(44,24,16,0.6); }
+        body.light .verse-pair .targum-verse { color: rgba(44,24,16,0.55); border-right-color: rgba(44,24,16,0.2); }
         body.light .spinner { color: rgba(139,90,43,0.6); }
         body.light .spinner-ring {
             border-color: rgba(139,90,43,0.2);
@@ -598,11 +632,11 @@
 
 <!-- Top Navigation -->
 <nav class="top-nav" id="topNav">
-    <button class="nav-btn active" id="navOmer" onclick="switchView('omer')">
+    <button class="nav-btn" id="navOmer" onclick="switchView('omer')">
         <span>🌙</span> ספירת העומר
     </button>
     <div class="nav-sep"></div>
-    <button class="nav-btn" id="navLearn" onclick="switchView('learning')">
+    <button class="nav-btn active" id="navLearn" onclick="switchView('learning')">
         <span>📖</span> הלימוד שלי
     </button>
     <div style="flex:1"></div>
@@ -644,13 +678,13 @@
                 </div>
             </div>
             <div class="progress-wrap">
-                <div class="progress-label" id="parashaProgressLabel">עלייה 1 מתוך 7</div>
+                <div class="progress-label" id="parashaProgressLabel">פרק 1 מתוך 3</div>
                 <div class="progress-bar-bg"><div class="progress-bar-fill" id="parashaProgressBar" style="width:14%"></div></div>
             </div>
             <div class="track-actions">
                 <button class="btn-primary" onclick="toggleParashaText()">📖 המשך ללמוד</button>
                 <button class="btn-done" id="parashaDoneBtn" onclick="markParashaDone()">✓ סיימתי</button>
-                <button class="btn-back" onclick="goBackParasha()">← חזור לעלייה הקודמת</button>
+                <button class="btn-back" onclick="goBackParasha()">← חזור לפרק הקודם</button>
             </div>
             <div class="text-panel" id="parashaTextPanel">
                 <div class="text-panel-title">הטקסט</div>
@@ -664,10 +698,7 @@
                     <button class="btn-tts-stop" id="parashaTtsStop" onclick="stopTTS()" style="display:none">⏹ עצור</button>
                     <span class="tts-chunk-progress" id="parashaTtsProgress"></span>
                 </div>
-                <div class="text-panel-toggle" id="parashaToggleRow">
-                    <button class="btn-toggle active" id="btnHeb" onclick="showParashaMode('heb')">עברית</button>
-                    <button class="btn-toggle" id="btnTargum" onclick="showParashaMode('targum')">תרגום אונקלוס</button>
-                </div>
+                <div class="text-panel-label" style="font-size:12px;color:var(--gold-dim);opacity:0.7;margin-bottom:4px;text-align:right;">מקרא ותרגום אונקלוס</div>
                 <div id="parashaTextContent"></div>
                 <div style="text-align:center; margin-top:18px;">
                     <button class="btn-done" id="parashaDoneBtnBottom" onclick="markParashaDone()">✓ סיימתי</button>
@@ -1142,7 +1173,7 @@ function switchView(view) {
     const btnOmer = document.getElementById('navOmer');
     const btnLearn = document.getElementById('navLearn');
     if (view === 'omer') {
-        omer.style.display = '';
+        omer.style.display = 'block';
         learning.style.display = 'none';
         btnOmer.classList.add('active');
         btnLearn.classList.remove('active');
@@ -1156,38 +1187,38 @@ function switchView(view) {
 }
 
 // ── Data: Parasha Schedule 5786 ──
-// Shabbat dates (Israel) → parasha name + Sefaria aliyot refs
+// Shabbat dates (Israel) → parasha name + chapters (one per reading session)
 const PARASHA_SCHEDULE = [
-    { name: 'שמיני', shabbat: new Date(2026, 3, 11),
-      aliyot: ['Leviticus 9:1-9:16','Leviticus 9:17-9:23','Leviticus 9:24-10:11','Leviticus 10:12-10:15','Leviticus 10:16-10:20','Leviticus 11:1-11:32','Leviticus 11:33-11:47'] },
-    { name: 'תזריע-מצורע', shabbat: new Date(2026, 3, 18),
-      aliyot: ['Leviticus 12:1-13:5','Leviticus 13:6-13:17','Leviticus 13:18-13:28','Leviticus 13:29-13:37','Leviticus 13:38-13:59','Leviticus 14:1-14:32','Leviticus 14:33-15:33'] },
-    { name: 'אחרי מות-קדושים', shabbat: new Date(2026, 3, 25),
-      aliyot: ['Leviticus 16:1-16:17','Leviticus 16:18-16:24','Leviticus 16:25-16:34','Leviticus 17:1-17:7','Leviticus 17:8-18:5','Leviticus 18:6-18:21','Leviticus 18:22-20:27'] },
-    { name: 'אמור', shabbat: new Date(2026, 4, 2),
-      aliyot: ['Leviticus 21:1-21:9','Leviticus 21:10-21:15','Leviticus 21:16-22:16','Leviticus 22:17-22:33','Leviticus 23:1-23:22','Leviticus 23:23-23:32','Leviticus 23:33-24:23'] },
-    { name: 'בהר-בחוקותי', shabbat: new Date(2026, 4, 9),
-      aliyot: ['Leviticus 25:1-25:13','Leviticus 25:14-25:18','Leviticus 25:19-25:24','Leviticus 25:25-25:28','Leviticus 25:29-25:38','Leviticus 25:39-26:2','Leviticus 26:3-27:34'] },
-    { name: 'במדבר', shabbat: new Date(2026, 4, 16),
-      aliyot: ['Numbers 1:1-1:19','Numbers 1:20-1:54','Numbers 2:1-2:34','Numbers 3:1-3:13','Numbers 3:14-3:39','Numbers 3:40-3:51','Numbers 4:1-4:20'] },
-    { name: 'נשא', shabbat: new Date(2026, 4, 23),
-      aliyot: ['Numbers 4:21-4:37','Numbers 4:38-4:49','Numbers 5:1-5:10','Numbers 5:11-5:31','Numbers 6:1-6:27','Numbers 7:1-7:41','Numbers 7:42-7:89'] },
-    { name: 'בהעלותך', shabbat: new Date(2026, 4, 30),
-      aliyot: ['Numbers 8:1-8:14','Numbers 8:15-8:26','Numbers 9:1-9:14','Numbers 9:15-10:10','Numbers 10:11-10:34','Numbers 10:35-11:29','Numbers 11:30-12:16'] },
-    { name: 'שלח', shabbat: new Date(2026, 5, 6),
-      aliyot: ['Numbers 13:1-13:20','Numbers 13:21-14:7','Numbers 14:8-14:25','Numbers 14:26-15:7','Numbers 15:8-15:16','Numbers 15:17-15:26','Numbers 15:27-15:41'] },
-    { name: 'קורח', shabbat: new Date(2026, 5, 13),
-      aliyot: ['Numbers 16:1-16:13','Numbers 16:14-16:19','Numbers 16:20-17:8','Numbers 17:9-17:15','Numbers 17:16-17:24','Numbers 17:25-18:20','Numbers 18:21-19:22'] },
-    { name: 'חוקת', shabbat: new Date(2026, 5, 20),
-      aliyot: ['Numbers 19:1-19:17','Numbers 19:18-20:6','Numbers 20:7-20:13','Numbers 20:14-20:21','Numbers 20:22-21:9','Numbers 21:10-21:20','Numbers 21:21-22:1'] },
-    { name: 'בלק', shabbat: new Date(2026, 5, 27),
-      aliyot: ['Numbers 22:2-22:12','Numbers 22:13-22:20','Numbers 22:21-22:38','Numbers 22:39-23:12','Numbers 23:13-23:26','Numbers 23:27-24:13','Numbers 24:14-25:9'] },
-    { name: 'פינחס', shabbat: new Date(2026, 6, 4),
-      aliyot: ['Numbers 25:10-26:4','Numbers 26:5-26:51','Numbers 26:52-27:5','Numbers 27:6-27:23','Numbers 28:1-28:15','Numbers 28:16-29:11','Numbers 29:12-30:1'] },
-    { name: 'מטות-מסעי', shabbat: new Date(2026, 6, 11),
-      aliyot: ['Numbers 30:2-30:17','Numbers 31:1-31:12','Numbers 31:13-31:54','Numbers 32:1-32:19','Numbers 32:20-32:42','Numbers 33:1-33:49','Numbers 33:50-36:13'] },
-    { name: 'דברים', shabbat: new Date(2026, 6, 18),
-      aliyot: ['Deuteronomy 1:1-1:10','Deuteronomy 1:11-1:21','Deuteronomy 1:22-1:38','Deuteronomy 1:39-2:1','Deuteronomy 2:2-2:30','Deuteronomy 2:31-3:14','Deuteronomy 3:15-3:22'] },
+    { name: 'שמיני',          shabbat: new Date(2026, 3, 11),
+      chapters: ['Leviticus 9','Leviticus 10','Leviticus 11'] },
+    { name: 'תזריע-מצורע',    shabbat: new Date(2026, 3, 18),
+      chapters: ['Leviticus 12','Leviticus 13','Leviticus 14','Leviticus 15'] },
+    { name: 'אחרי מות-קדושים',shabbat: new Date(2026, 3, 25),
+      chapters: ['Leviticus 16','Leviticus 17','Leviticus 18','Leviticus 19','Leviticus 20'] },
+    { name: 'אמור',           shabbat: new Date(2026, 4, 2),
+      chapters: ['Leviticus 21','Leviticus 22','Leviticus 23','Leviticus 24'] },
+    { name: 'בהר-בחוקותי',    shabbat: new Date(2026, 4, 9),
+      chapters: ['Leviticus 25','Leviticus 26','Leviticus 27'] },
+    { name: 'במדבר',          shabbat: new Date(2026, 4, 16),
+      chapters: ['Numbers 1','Numbers 2','Numbers 3','Numbers 4'] },
+    { name: 'נשא',            shabbat: new Date(2026, 4, 23),
+      chapters: ['Numbers 5','Numbers 6','Numbers 7'] },
+    { name: 'בהעלותך',        shabbat: new Date(2026, 4, 30),
+      chapters: ['Numbers 8','Numbers 9','Numbers 10','Numbers 11','Numbers 12'] },
+    { name: 'שלח',            shabbat: new Date(2026, 5, 6),
+      chapters: ['Numbers 13','Numbers 14','Numbers 15'] },
+    { name: 'קורח',           shabbat: new Date(2026, 5, 13),
+      chapters: ['Numbers 16','Numbers 17','Numbers 18','Numbers 19'] },
+    { name: 'חוקת',           shabbat: new Date(2026, 5, 20),
+      chapters: ['Numbers 20','Numbers 21','Numbers 22'] },
+    { name: 'בלק',            shabbat: new Date(2026, 5, 27),
+      chapters: ['Numbers 22','Numbers 23','Numbers 24','Numbers 25'] },
+    { name: 'פינחס',          shabbat: new Date(2026, 6, 4),
+      chapters: ['Numbers 26','Numbers 27','Numbers 28','Numbers 29'] },
+    { name: 'מטות-מסעי',      shabbat: new Date(2026, 6, 11),
+      chapters: ['Numbers 30','Numbers 31','Numbers 32','Numbers 33','Numbers 34','Numbers 35','Numbers 36'] },
+    { name: 'דברים',          shabbat: new Date(2026, 6, 18),
+      chapters: ['Deuteronomy 1','Deuteronomy 2','Deuteronomy 3'] },
 ];
 
 // ── Data: Mishna Order ──
@@ -1309,8 +1340,8 @@ function saveProgress(prog) {
 
 // ── State ──
 let prog = loadProgress();
-let parashaTextMode = 'heb'; // 'heb' | 'targum'
-let parashaFetched = { heb: null, targum: null };
+// parashaTextMode removed — now always shows both Hebrew + Targum interleaved
+let parashaFetched = { heb: null, targum: null, ref: null };
 let mishnaFetched = null;
 let tanakhFetched = null;
 let parashaOpen = false;
@@ -1343,21 +1374,32 @@ function initParashaAutoDetect() {
     }
 }
 
+const BOOK_HE = { Leviticus:'ויקרא', Numbers:'במדבר', Deuteronomy:'דברים', Genesis:'בראשית', Exodus:'שמות' };
+const HE_NUMS = ['','א','ב','ג','ד','ה','ו','ז','ח','ט','י','יא','יב','יג','יד','טו','טז','יז','יח','יט','כ','כא','כב','כג','כד','כה','כו','כז','כח','כט','ל','לא','לב','לג','לד','לה','לו'];
+function chapterLabel(ref) {
+    const m = ref.match(/^(\w+)\s+(\d+)$/);
+    if (!m) return ref;
+    const book = BOOK_HE[m[1]] || m[1];
+    const num  = +m[2];
+    return book + ' פרק ' + (HE_NUMS[num] || num) + "'";
+}
+
 function updateParashaUI() {
     const pIdx = prog.parasha.parashaIndex;
-    const aIdx = prog.parasha.aliyahIndex;
+    const cIdx = prog.parasha.aliyahIndex; // reused as chapterIndex
     if (pIdx >= PARASHA_SCHEDULE.length) {
         document.getElementById('parashaSubtitle').textContent = 'כל הפרשות הושלמו! 🎉';
         return;
     }
     const p = PARASHA_SCHEDULE[pIdx];
     document.getElementById('parashaSubtitle').textContent = 'פרשת ' + p.name;
-    const aliyahNames = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שביעי'];
-    const aName = aliyahNames[aIdx] || (aIdx+1);
-    document.getElementById('parashaCurrentAliyah').textContent = 'עלייה ' + aName;
-    const total = p.aliyot.length;
-    const pct = Math.round(((aIdx) / total) * 100);
-    document.getElementById('parashaProgressLabel').textContent = 'עלייה ' + (aIdx+1) + ' מתוך ' + total;
+    const ref = p.chapters[cIdx] || p.chapters[0];
+    document.getElementById('parashaCurrentAliyah').textContent = chapterLabel(ref);
+    const total = p.chapters.length;
+    const pct = Math.round((cIdx / total) * 100);
+    const aliyahOrdinals = ['ראשונה','שנייה','שלישית','רביעית','חמישית','שישית','שביעית','מפטיר'];
+    const aliyahName = aliyahOrdinals[cIdx] || (cIdx+1);
+    document.getElementById('parashaProgressLabel').textContent = 'עלייה ' + aliyahName + ' מתוך ' + total;
     document.getElementById('parashaProgressBar').style.width = Math.max(6, pct) + '%';
 }
 
@@ -1373,90 +1415,102 @@ function toggleParashaText() {
     }
 }
 
-function showParashaMode(mode) {
-    parashaTextMode = mode;
-    document.getElementById('btnHeb').classList.toggle('active', mode === 'heb');
-    document.getElementById('btnTargum').classList.toggle('active', mode === 'targum');
-    renderParashaText();
-    if (mode === 'targum' && !parashaFetched.targum) {
-        fetchParashaText(true);
-    }
-}
+function showParashaMode() { /* deprecated — now shows both together */ }
 
-async function fetchParashaText(targumOnly = false) {
+async function fetchParashaText() {
     const pIdx = prog.parasha.parashaIndex;
-    const aIdx = prog.parasha.aliyahIndex;
+    const cIdx = prog.parasha.aliyahIndex;
     if (pIdx >= PARASHA_SCHEDULE.length) return;
-    const ref = PARASHA_SCHEDULE[pIdx].aliyot[aIdx];
-    const cacheKey = 'parasha_' + ref;
-    const cacheKeyT = 'parasha_t_' + ref;
+    const ref = PARASHA_SCHEDULE[pIdx].chapters[cIdx];
+    if (!ref) return;
+    const cacheKey  = 'parasha_ch_' + ref;
+    const cacheKeyT = 'parasha_cht_' + ref;
 
-    if (!targumOnly) {
-        // Fetch Hebrew
-        if (parashaFetched.heb) { renderParashaText(); return; }
-        const cached = sessionStorage.getItem(cacheKey);
-        if (cached) { parashaFetched.heb = JSON.parse(cached); renderParashaText(); }
-        else {
-            showSpinner('parashaTextContent');
-            try {
-                const url = 'https://www.sefaria.org/api/texts/' + encodeURIComponent(ref) + '?lang=he&commentary=0';
-                const r = await fetch(url);
-                const data = await r.json();
-                parashaFetched.heb = data;
-                sessionStorage.setItem(cacheKey, JSON.stringify(data));
-                renderParashaText();
-            } catch(e) { showError('parashaTextContent', 'שגיאה בטעינת הטקסט. אנא נסה שוב.'); }
-        }
-    } else {
-        // Fetch Targum Onkelos
-        if (parashaFetched.targum) { renderParashaText(); return; }
-        const cached = sessionStorage.getItem(cacheKeyT);
-        if (cached) { parashaFetched.targum = JSON.parse(cached); renderParashaText(); return; }
-        showSpinner('parashaTextContent');
-        try {
-            // Sefaria: Onkelos texts are named "Onkelos Genesis 1:1-2:3" etc.
-            const onkelosRef = 'Onkelos ' + ref;
-            const url = 'https://www.sefaria.org/api/texts/' + encodeURIComponent(onkelosRef) + '?lang=he&commentary=0';
-            const r = await fetch(url);
-            const data = await r.json();
-            if (!data.he || (Array.isArray(data.he) && data.he.length === 0)) throw new Error('empty');
-            parashaFetched.targum = data;
-            sessionStorage.setItem(cacheKeyT, JSON.stringify(data));
-            renderParashaText();
-        } catch(e) {
-            showError('parashaTextContent', 'תרגום אונקלוס אינו זמין כרגע.');
-        }
+    // Clear in-memory cache if we moved to a different chapter
+    if (parashaFetched.ref !== ref) {
+        parashaFetched = { heb: null, targum: null, ref: ref };
     }
+
+    if (parashaFetched.heb && parashaFetched.targum) { renderParashaText(); return; }
+
+    showSpinner('parashaTextContent');
+
+    // Fetch Hebrew from cache or network
+    if (!parashaFetched.heb) {
+        const cached = sessionStorage.getItem(cacheKey);
+        if (cached) { parashaFetched.heb = JSON.parse(cached); }
+    }
+    // Fetch Targum from cache or network
+    if (!parashaFetched.targum) {
+        const cached = sessionStorage.getItem(cacheKeyT);
+        if (cached) { parashaFetched.targum = JSON.parse(cached); }
+    }
+
+    const promises = [];
+    if (!parashaFetched.heb) {
+        promises.push(
+            fetch('https://www.sefaria.org/api/texts/' + encodeURIComponent(ref) + '?lang=he&commentary=0')
+                .then(r => r.json())
+                .then(data => { parashaFetched.heb = data; sessionStorage.setItem(cacheKey, JSON.stringify(data)); })
+                .catch(() => {})
+        );
+    }
+    if (!parashaFetched.targum) {
+        promises.push(
+            fetch('https://www.sefaria.org/api/texts/' + encodeURIComponent('Onkelos ' + ref) + '?lang=he&commentary=0')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.he && !(Array.isArray(data.he) && data.he.length === 0)) {
+                        parashaFetched.targum = data;
+                        sessionStorage.setItem(cacheKeyT, JSON.stringify(data));
+                    }
+                })
+                .catch(() => {}) // Targum failure is non-fatal
+        );
+    }
+
+    try { await Promise.all(promises); } catch(e) {}
+
+    if (!parashaFetched.heb) { showError('parashaTextContent', 'שגיאה בטעינת הטקסט. אנא נסה שוב.'); return; }
+    renderParashaText();
 }
 
 function renderParashaText() {
     const el = document.getElementById('parashaTextContent');
-    const mode = parashaTextMode;
-    const data = mode === 'heb' ? parashaFetched.heb : parashaFetched.targum;
-    if (!data) { if (mode === 'targum') fetchParashaText(true); return; }
+    const hebData = parashaFetched.heb;
+    if (!hebData) return;
 
-    // Strip taamim for Hebrew; Onkelos (Aramaic) has no taamim anyway
-    const verses = flattenText(mode === 'heb' ? (data.he || data.text) : (data.he || data.text), true);
-    if (!verses || verses.length === 0) { el.innerHTML = '<div class="error-msg">הטקסט אינו זמין כרגע</div>'; return; }
+    const hebVerses = flattenText(hebData.he || hebData.text, true);
+    if (!hebVerses || hebVerses.length === 0) { el.innerHTML = '<div class="error-msg">הטקסט אינו זמין כרגע</div>'; return; }
+
+    const targumData = parashaFetched.targum;
+    const targumVerses = targumData ? flattenText(targumData.he || targumData.text, true) : [];
 
     let html = '<div class="text-content">';
-    verses.forEach((v, i) => {
-        if (v && v.trim()) {
-            html += '<span class="verse"><span class="verse-num">' + (i+1) + '</span>' + v + '</span>';
+    hebVerses.forEach((v, i) => {
+        if (!v || !v.trim()) return;
+        const targ = targumVerses[i] && targumVerses[i].trim() ? targumVerses[i] : null;
+        html += '<div class="verse-pair">';
+        html += '<span class="verse heb-verse"><span class="verse-num">' + (i+1) + '</span>' + v + '</span>';
+        if (targ) {
+            html += '<span class="verse targum-verse">' + targ + '</span>';
         }
+        html += '</div>';
     });
     html += '</div>';
     el.innerHTML = html;
+    // Reset TTS wrap flag so the new content gets re-wrapped
+    el.dataset.ttsWrapped = '';
 }
 
 function markParashaDone() {
-    parashaFetched = { heb: null, targum: null };
+    parashaFetched = { heb: null, targum: null, ref: null };
     parashaOpen = false;
     document.getElementById('parashaTextPanel').classList.remove('open');
     const p = PARASHA_SCHEDULE[prog.parasha.parashaIndex];
     if (!p) return;
     prog.parasha.aliyahIndex++;
-    if (prog.parasha.aliyahIndex >= p.aliyot.length) {
+    if (prog.parasha.aliyahIndex >= p.chapters.length) {
         prog.parasha.aliyahIndex = 0;
         prog.parasha.parashaIndex++;
     }
@@ -1467,7 +1521,7 @@ function markParashaDone() {
 }
 
 function goBackParasha() {
-    parashaFetched = { heb: null, targum: null };
+    parashaFetched = { heb: null, targum: null, ref: null };
     parashaOpen = false;
     document.getElementById('parashaTextPanel').classList.remove('open');
     if (prog.parasha.aliyahIndex > 0) {
@@ -1475,7 +1529,7 @@ function goBackParasha() {
     } else if (prog.parasha.parashaIndex > 0) {
         prog.parasha.parashaIndex--;
         const prev = PARASHA_SCHEDULE[prog.parasha.parashaIndex];
-        prog.parasha.aliyahIndex = prev.aliyot.length - 1;
+        prog.parasha.aliyahIndex = prev.chapters.length - 1;
     }
     saveProgress(prog);
     updateParashaUI();
@@ -1670,6 +1724,39 @@ function stripTaamim(str) {
     return str.replace(/[\u0591-\u05AF]/g, '');
 }
 
+// Sefaria always returns full chapter(s). Use sections/toSections from the response to slice.
+function sliceVersesByData(data, stripAccents = false) {
+    const heArr = data.he || data.text;
+    const sections = data.sections || [];
+    const toSections = data.toSections || [];
+    const strip = s => (stripAccents ? stripTaamim(s) : s) || '';
+
+    // No range info — return everything
+    if (sections.length < 2 || toSections.length < 2) return flattenText(heArr, stripAccents);
+
+    const startV = sections[sections.length - 1];     // 1-based start verse
+    const endV   = toSections[toSections.length - 1]; // 1-based end verse
+    const sameCh = sections[0] === toSections[0];
+
+    if (sameCh) {
+        // Single chapter: heArr is a flat array of all chapter's verses
+        const arr = (Array.isArray(heArr) && Array.isArray(heArr[0])) ? heArr[0] : heArr;
+        return arr.slice(startV - 1, endV).map(strip);
+    } else {
+        // Multi-chapter: heArr is [[ch1 verses], [ch2 verses], ...]
+        const result = [];
+        const numCh = toSections[0] - sections[0] + 1;
+        for (let i = 0; i < numCh; i++) {
+            const chArr = Array.isArray(heArr[i]) ? heArr[i] : [];
+            const slice = i === 0           ? chArr.slice(startV - 1)  // from startV
+                        : i === numCh - 1   ? chArr.slice(0, endV)     // up to endV
+                        :                     chArr;                    // full middle chapter
+            slice.forEach(v => { if (v && v.trim()) result.push(strip(v)); });
+        }
+        return result;
+    }
+}
+
 function flattenText(arr, stripAccents = false) {
     if (!arr) return [];
     if (typeof arr === 'string') return [stripAccents ? stripTaamim(arr) : arr];
@@ -1702,10 +1789,37 @@ function flashDone(btnId) {
 
 // ── Init learning view ──
 let learningInitDone = false;
+function clearOldParashaCache() {
+    // Remove any sessionStorage entries that might have full-chapter data cached
+    // without the sections/toSections metadata needed for correct slicing.
+    const toRemove = [];
+    for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        if (key && key.startsWith('parasha_')) {
+            try {
+                const d = JSON.parse(sessionStorage.getItem(key));
+                if (!d || !d.sections || !d.toSections) toRemove.push(key);
+            } catch(e) { toRemove.push(key); }
+        }
+    }
+    toRemove.forEach(k => sessionStorage.removeItem(k));
+}
+
+function normalizeProg(p) {
+    // Clamp chapter index in case old progress had more aliyot than current chapters
+    const parasha = PARASHA_SCHEDULE[p.parasha.parashaIndex];
+    if (parasha && p.parasha.aliyahIndex >= parasha.chapters.length) {
+        p.parasha.aliyahIndex = 0;
+        saveProgress(p);
+    }
+    return p;
+}
+
 function initLearning() {
     if (learningInitDone) { updateParashaUI(); updateMishnaUI(); updateTanakhUI(); return; }
     learningInitDone = true;
-    prog = loadProgress();
+    clearOldParashaCache();
+    prog = normalizeProg(loadProgress());
     initParashaAutoDetect();
     updateParashaUI();
     updateMishnaUI();
@@ -1761,6 +1875,7 @@ function initParallax() {
     }, { passive: true });
 }
 initParallax();
+initLearning(); // learning view is default, so init immediately
 
 // ── Learning page hero parallax ──
 function initLearnHero() {
@@ -2078,7 +2193,7 @@ async function startFromWordIdx(elId, wordIdx) {
     const container = document.getElementById(elId);
     const allSpans = Array.from(container.querySelectorAll('.tts-word'));
     if (allSpans.length === 0) {
-        alert('יש ללחוץ תחילה על "📖 המשך ללמוד" כדי לטעון את הטקסט');
+        console.warn('TTS: no text content found in', elId); return;
         return;
     }
 
@@ -2149,6 +2264,29 @@ async function speakText(contentElId, btnEl) {
     if (ttsCurrentBtnId === btnEl.id && ttsAudio && ttsAudio.paused) {
         ttsAudio.play().then(() => btnEl.innerHTML = '⏸ השהה'); return;
     }
+
+    // Auto-open text panel if not yet loaded
+    const container = document.getElementById(contentElId);
+    const isEmpty = !container || container.querySelectorAll('.tts-word, .verse, p').length === 0;
+    if (isEmpty) {
+        btnEl.innerHTML = '⏳ טוען...';
+        btnEl.disabled = true;
+        // Open the correct panel
+        if (contentElId === 'parashaTextContent') {
+            if (!parashaOpen) toggleParashaText();
+            await fetchParashaText();
+        } else if (contentElId === 'mishnaTextContent') {
+            if (!mishnaOpen) toggleMishnaText();
+            await fetchMishnaText();
+        } else if (contentElId === 'tanakhTextContent') {
+            if (!tanakhOpen) toggleTanakhText();
+            await fetchTanakhText();
+        }
+        // Small delay to let DOM render
+        await new Promise(r => setTimeout(r, 150));
+        btnEl.disabled = false;
+    }
+
     await startFromWordIdx(contentElId, 0);
 }
 
