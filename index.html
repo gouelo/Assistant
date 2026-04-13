@@ -417,6 +417,7 @@
         /* Verse pair: Hebrew + Targum interleaved */
         .verse-pair { margin-bottom: 18px; }
         .verse-pair .heb-verse { display: block; margin-bottom: 4px; }
+        .verse-pair .heb-verse-repeat { display: block; margin-bottom: 4px; opacity: 0.65; }
         .verse-pair .targum-verse { display: block; color: rgba(255,255,255,0.52); font-style: italic; font-size: 0.91em; line-height: 1.85; padding-right: 22px; border-right: 2px solid rgba(244,196,48,0.2); direction: rtl; }
         .targum-text { color: rgba(255,255,255,0.55); font-style: italic; font-size: 0.92em; line-height: 1.9; margin-top: 8px; direction: rtl; }
 
@@ -489,6 +490,7 @@
         }
         body.light .targum-text { color: rgba(44,24,16,0.6); }
         body.light .verse-pair .targum-verse { color: rgba(44,24,16,0.55); border-right-color: rgba(44,24,16,0.2); }
+        body.light .verse-pair .heb-verse-repeat { opacity: 0.55; }
         body.light .spinner { color: rgba(139,90,43,0.6); }
         body.light .spinner-ring {
             border-color: rgba(139,90,43,0.2);
@@ -719,12 +721,15 @@
                     <button class="btn-font" onclick="changeFontSize(-1)" title="הקטן">−</button>
                     <button class="btn-font" onclick="changeFontSize(1)" title="הגדל">+</button>
                 </div>
+                <div class="text-panel-toggle" style="margin-bottom:10px;">
+                    <button class="btn-toggle active" id="btnParashaHeb" onclick="setParashaDisplayMode('heb')">עברית</button>
+                    <button class="btn-toggle" id="btnParashaShnayim" onclick="setParashaDisplayMode('shnayim')">ב׳ מקרא ותרגום</button>
+                </div>
                 <div class="tts-controls">
                     <button class="btn-tts" id="parashaTtsBtn" onclick="speakText('parashaTextContent', this)">🔊 הקרא</button>
                     <button class="btn-tts-stop" id="parashaTtsStop" onclick="stopTTS()" style="display:none">⏹ עצור</button>
                     <span class="tts-chunk-progress" id="parashaTtsProgress"></span>
                 </div>
-                <div class="text-panel-label" style="font-size:12px;color:var(--gold-dim);opacity:0.7;margin-bottom:4px;text-align:right;">מקרא ותרגום אונקלוס</div>
                 <div id="parashaTextContent"></div>
                 <div style="text-align:center; margin-top:18px;">
                     <button class="btn-done" id="parashaDoneBtnBottom" onclick="markParashaDone()">✓ סיימתי</button>
@@ -1381,7 +1386,17 @@ function saveProgress(prog) {
 
 // ── State ──
 let prog = loadProgress();
-// parashaTextMode removed — now always shows both Hebrew + Targum interleaved
+let parashaDisplayMode = 'heb'; // 'heb' | 'shnayim'
+
+function setParashaDisplayMode(mode) {
+    parashaDisplayMode = mode;
+    document.getElementById('btnParashaHeb').classList.toggle('active', mode === 'heb');
+    document.getElementById('btnParashaShnayim').classList.toggle('active', mode === 'shnayim');
+    stopTTS();
+    renderParashaText();
+    // If shnayim mode selected and targum not yet loaded, fetch it
+    if (mode === 'shnayim' && !parashaFetched.targum) fetchParashaText();
+}
 let parashaFetched = { heb: null, targum: null, ref: null };
 let mishnaFetched = null;
 let tanakhFetched = null;
@@ -1474,7 +1489,8 @@ async function fetchParashaText() {
         parashaFetched = { heb: null, targum: null, ref: ref };
     }
 
-    if (parashaFetched.heb && parashaFetched.targum) { renderParashaText(); return; }
+    const needTargum = parashaDisplayMode === 'shnayim';
+    if (parashaFetched.heb && (!needTargum || parashaFetched.targum)) { renderParashaText(); return; }
 
     showSpinner('parashaTextContent');
 
@@ -1484,7 +1500,7 @@ async function fetchParashaText() {
         if (cached) { parashaFetched.heb = JSON.parse(cached); }
     }
     // Fetch Targum from cache or network
-    if (!parashaFetched.targum) {
+    if (needTargum && !parashaFetched.targum) {
         const cached = sessionStorage.getItem(cacheKeyT);
         if (cached) { parashaFetched.targum = JSON.parse(cached); }
     }
@@ -1498,7 +1514,7 @@ async function fetchParashaText() {
                 .catch(() => {})
         );
     }
-    if (!parashaFetched.targum) {
+    if (needTargum && !parashaFetched.targum) {
         promises.push(
             fetch('https://www.sefaria.org/api/texts/' + encodeURIComponent('Onkelos ' + ref) + '?lang=he&commentary=0')
                 .then(r => r.json())
@@ -1526,19 +1542,27 @@ function renderParashaText() {
     const hebVerses = flattenText(hebData.he || hebData.text, true);
     if (!hebVerses || hebVerses.length === 0) { el.innerHTML = '<div class="error-msg">הטקסט אינו זמין כרגע</div>'; return; }
 
+    const mode = parashaDisplayMode;
     const targumData = parashaFetched.targum;
-    const targumVerses = targumData ? flattenText(targumData.he || targumData.text, true) : [];
+    const targumVerses = (mode === 'shnayim' && targumData) ? flattenText(targumData.he || targumData.text, true) : [];
 
     let html = '<div class="text-content">';
     hebVerses.forEach((v, i) => {
         if (!v || !v.trim()) return;
-        const targ = targumVerses[i] && targumVerses[i].trim() ? targumVerses[i] : null;
-        html += '<div class="verse-pair">';
-        html += '<span class="verse heb-verse"><span class="verse-num">' + (i+1) + '</span>' + v + '</span>';
-        if (targ) {
-            html += '<span class="verse targum-verse">' + targ + '</span>';
+        const num = '<span class="verse-num">' + (i+1) + '</span>';
+
+        if (mode === 'heb') {
+            // Hebrew only
+            html += '<span class="verse heb-verse">' + num + v + '</span>';
+        } else {
+            // שניים מקרא ואחד תרגום
+            const targ = targumVerses[i] && targumVerses[i].trim() ? targumVerses[i] : null;
+            html += '<div class="verse-pair">';
+            html += '<span class="verse heb-verse">' + num + v + '</span>';
+            html += '<span class="verse heb-verse-repeat">' + num + v + '</span>';
+            if (targ) html += '<span class="verse targum-verse">' + targ + '</span>';
+            html += '</div>';
         }
-        html += '</div>';
     });
     html += '</div>';
     el.innerHTML = html;
