@@ -2316,15 +2316,22 @@ async function startFromWordIdx(elId, wordIdx) {
     const chunks = chunkWordArray(words, TTS_WORDS_PER_CHUNK);
     let chunkOffset = 0;
 
+    // Pre-fetch first chunk immediately
+    let nextChunkPromise = chunks.length > 0 ? fetchChunk(chunks[0]) : null;
+
     for (let idx = 0; idx < chunks.length; idx++) {
         if (myId !== ttsSessionId) return;
 
-        if (btn) { btn.innerHTML = '⏳ טוען...'; btn.disabled = true; }
         if (prog && chunks.length > 1) prog.textContent = `${idx + 1}/${chunks.length}`;
 
         try {
-            const { audioUrl, timepoints } = await fetchChunk(chunks[idx]);
+            // Await the pre-fetched chunk (already loading in background)
+            if (btn && !ttsAudio) { btn.innerHTML = '⏳ טוען...'; btn.disabled = true; }
+            const { audioUrl, timepoints } = await nextChunkPromise;
             if (myId !== ttsSessionId) return;
+
+            // Start pre-fetching NEXT chunk immediately while current plays
+            nextChunkPromise = (idx + 1 < chunks.length) ? fetchChunk(chunks[idx + 1]) : null;
 
             const audio = new Audio(audioUrl);
             ttsAudio = audio;
@@ -2338,7 +2345,7 @@ async function startFromWordIdx(elId, wordIdx) {
                 audio.addEventListener('timeupdate', function iosCheck() {
                     if (audio.duration > 0 && audio.currentTime >= audio.duration - 0.15) {
                         audio.removeEventListener('timeupdate', iosCheck);
-                        setTimeout(finish, 250);
+                        setTimeout(finish, 200);
                     }
                 });
                 audio.play().then(() => {
