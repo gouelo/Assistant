@@ -577,6 +577,32 @@
         .tts-chunk-progress {
             font-size: 11px; color: rgba(244,196,48,0.4); letter-spacing: 1px;
         }
+
+        /* Floating TTS mini-player */
+        .tts-float-bar {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;
+            background: rgba(8,8,20,0.97);
+            border-top: 1px solid rgba(244,196,48,0.35);
+            backdrop-filter: blur(14px);
+            padding: 10px 20px;
+            display: flex; align-items: center; gap: 12px;
+            direction: rtl;
+            transform: translateY(100%);
+            transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+            box-shadow: 0 -4px 24px rgba(0,0,0,0.4);
+        }
+        .tts-float-bar.visible { transform: translateY(0); }
+        .tts-float-label { flex: 1; font-size: 13px; color: var(--gold-dim); font-family: 'Frank Ruhl Libre', serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .tts-float-btn {
+            background: rgba(244,196,48,0.1); border: 1px solid rgba(244,196,48,0.35);
+            color: #f4c430; border-radius: 50%; width: 38px; height: 38px;
+            font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.18s; flex-shrink: 0;
+        }
+        .tts-float-btn:hover { background: rgba(244,196,48,0.22); border-color: rgba(244,196,48,0.7); }
+        .tts-float-stop { font-size: 13px; }
+        body.light .tts-float-bar { background: rgba(245,240,232,0.97); border-top-color: rgba(139,90,43,0.35); }
+        body.light .tts-float-btn { background: rgba(139,90,43,0.1); border-color: rgba(139,90,43,0.35); color: #7a4f2a; }
         body.light .btn-tts {
             background: linear-gradient(135deg, rgba(139,90,43,0.1), rgba(184,134,11,0.15));
             border-color: rgba(139,90,43,0.35); color: #7a4f2a;
@@ -2239,6 +2265,7 @@ async function startFromWordIdx(elId, wordIdx) {
                     if (btn)    { btn.innerHTML = '⏸ השהה'; btn.disabled = false; }
                     if (stopEl)   stopEl.style.display = '';
                     startHighlighting(audio, timepoints, wordIdx + chunkOffset);
+                    updateFloatBar();
                 }).catch(reject);
             });
 
@@ -2259,10 +2286,10 @@ async function startFromWordIdx(elId, wordIdx) {
 
 async function speakText(contentElId, btnEl) {
     if (ttsCurrentBtnId === btnEl.id && ttsAudio && !ttsAudio.paused) {
-        ttsAudio.pause(); clearInterval(ttsHighlightTimer); btnEl.innerHTML = '▶ המשך'; return;
+        ttsAudio.pause(); clearInterval(ttsHighlightTimer); btnEl.innerHTML = '▶ המשך'; updateFloatBar(); return;
     }
     if (ttsCurrentBtnId === btnEl.id && ttsAudio && ttsAudio.paused) {
-        ttsAudio.play().then(() => btnEl.innerHTML = '⏸ השהה'); return;
+        ttsAudio.play().then(() => { btnEl.innerHTML = '⏸ השהה'; updateFloatBar(); }); return;
     }
 
     // Auto-open text panel if not yet loaded
@@ -2311,7 +2338,48 @@ function resetTTSUI() {
     });
     ttsCurrentBtnId = null;
     ttsContentElId  = null;
+    updateFloatBar();
+}
+
+const TRACK_NAMES = { parasha: 'פרשת השבוע', mishna: 'משנה יומית', tanakh: 'תנ"ך' };
+
+function updateFloatBar(playing) {
+    const bar = document.getElementById('ttsFloatBar');
+    const lbl = document.getElementById('ttsFloatLabel');
+    const btn = document.getElementById('ttsFloatPlayPause');
+    if (!bar) return;
+    if (!ttsCurrentBtnId) {
+        bar.classList.remove('visible'); return;
+    }
+    bar.classList.add('visible');
+    const track = ttsCurrentBtnId.replace('TtsBtn', '');
+    if (lbl) lbl.textContent = '🔊 ' + (TRACK_NAMES[track] || track);
+    const isPaused = ttsAudio ? ttsAudio.paused : true;
+    if (btn) btn.textContent = isPaused ? '▶' : '⏸';
+}
+
+function floatPlayPause() {
+    if (!ttsAudio || !ttsCurrentBtnId) return;
+    const btn = document.getElementById(ttsCurrentBtnId);
+    if (ttsAudio.paused) {
+        ttsAudio.play().then(() => {
+            if (btn) btn.innerHTML = '⏸ השהה';
+            updateFloatBar();
+        });
+    } else {
+        ttsAudio.pause();
+        clearInterval(ttsHighlightTimer);
+        if (btn) btn.innerHTML = '▶ המשך';
+        updateFloatBar();
+    }
 }
 </script>
+
+<!-- Floating TTS mini-player -->
+<div id="ttsFloatBar" class="tts-float-bar">
+    <span id="ttsFloatLabel" class="tts-float-label">🔊 מקריא...</span>
+    <button id="ttsFloatPlayPause" class="tts-float-btn" onclick="floatPlayPause()" title="השהה / המשך">⏸</button>
+    <button class="tts-float-btn tts-float-stop" onclick="stopTTS()" title="עצור">⏹</button>
+</div>
 </body>
 </html>
