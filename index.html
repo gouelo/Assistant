@@ -583,28 +583,46 @@
         /* Floating TTS mini-player */
         .tts-float-bar {
             position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;
-            background: rgba(8,8,20,0.97);
-            border-top: 1px solid rgba(244,196,48,0.35);
-            backdrop-filter: blur(14px);
-            padding: 10px 20px;
-            display: flex; align-items: center; gap: 12px;
+            background: linear-gradient(180deg, rgba(12,12,28,0.98) 0%, rgba(8,8,20,0.99) 100%);
+            border-top: 1px solid rgba(244,196,48,0.3);
+            backdrop-filter: blur(20px);
+            padding: 10px 16px 14px;
+            display: flex; align-items: center; gap: 10px;
             direction: rtl;
             transform: translateY(100%);
-            transition: transform 0.28s cubic-bezier(.4,0,.2,1);
-            box-shadow: 0 -4px 24px rgba(0,0,0,0.4);
+            transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+            box-shadow: 0 -8px 32px rgba(0,0,0,0.5);
         }
         .tts-float-bar.visible { transform: translateY(0); }
-        .tts-float-label { flex: 1; font-size: 13px; color: var(--gold-dim); font-family: 'Frank Ruhl Libre', serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .tts-float-info { flex: 1; min-width: 0; }
+        .tts-float-label { display: block; font-size: 13px; color: var(--gold); font-family: 'Frank Ruhl Libre', serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+        .tts-float-sub { display: block; font-size: 10px; color: rgba(244,196,48,0.45); letter-spacing: 1px; margin-top: 1px; }
+        .tts-float-controls { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+        .tts-speed-group { display: flex; gap: 3px; }
+        .tts-speed-btn {
+            background: rgba(244,196,48,0.06); border: 1px solid rgba(244,196,48,0.2);
+            color: rgba(244,196,48,0.55); border-radius: 8px;
+            padding: 4px 8px; font-size: 11px; font-family: 'Frank Ruhl Libre', serif;
+            cursor: pointer; transition: all 0.15s; font-weight: 600; letter-spacing: 0.3px;
+        }
+        .tts-speed-btn.active, .tts-speed-btn:hover { background: rgba(244,196,48,0.18); border-color: rgba(244,196,48,0.6); color: #f4c430; }
         .tts-float-btn {
             background: rgba(244,196,48,0.1); border: 1px solid rgba(244,196,48,0.35);
-            color: #f4c430; border-radius: 50%; width: 38px; height: 38px;
-            font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            color: #f4c430; border-radius: 50%; width: 40px; height: 40px;
+            font-size: 17px; cursor: pointer; display: flex; align-items: center; justify-content: center;
             transition: all 0.18s; flex-shrink: 0;
         }
-        .tts-float-btn:hover { background: rgba(244,196,48,0.22); border-color: rgba(244,196,48,0.7); }
-        .tts-float-stop { font-size: 13px; }
-        body.light .tts-float-bar { background: rgba(245,240,232,0.97); border-top-color: rgba(139,90,43,0.35); }
-        body.light .tts-float-btn { background: rgba(139,90,43,0.1); border-color: rgba(139,90,43,0.35); color: #7a4f2a; }
+        .tts-float-btn:hover { background: rgba(244,196,48,0.25); border-color: rgba(244,196,48,0.75); }
+        .tts-float-playpause { background: rgba(244,196,48,0.15); border-color: rgba(244,196,48,0.5); font-size: 18px; width: 44px; height: 44px; }
+        .tts-float-stop { font-size: 13px; opacity: 0.7; }
+        .tts-float-stop:hover { opacity: 1; }
+        body.light .tts-float-bar { background: linear-gradient(180deg, rgba(250,245,235,0.98) 0%, rgba(245,240,228,0.99) 100%); border-top-color: rgba(139,90,43,0.3); }
+        body.light .tts-float-btn { background: rgba(139,90,43,0.08); border-color: rgba(139,90,43,0.3); color: #7a4f2a; }
+        body.light .tts-speed-btn { background: rgba(139,90,43,0.05); border-color: rgba(139,90,43,0.2); color: rgba(139,90,43,0.5); }
+        body.light .tts-speed-btn.active, body.light .tts-speed-btn:hover { background: rgba(139,90,43,0.15); border-color: rgba(139,90,43,0.5); color: #7a4f2a; }
+        body.light .tts-float-label { color: #7a4f2a; }
+        body.light .tts-float-sub { color: rgba(139,90,43,0.45); }
+        body.light .tts-float-playpause { background: rgba(139,90,43,0.12); border-color: rgba(139,90,43,0.4); }
         body.light .btn-tts {
             background: linear-gradient(135deg, rgba(139,90,43,0.1), rgba(184,134,11,0.15));
             border-color: rgba(139,90,43,0.35); color: #7a4f2a;
@@ -2130,6 +2148,15 @@ applyTheme(localStorage.getItem('colorScheme') || 'dark');
 const TTS_API_KEY = 'AIzaSyAC9hS-3raORdI6Qt-XayXRdx3kvoqe8ew';
 const TTS_VOICE = 'he-IL-Wavenet-D';
 const TTS_WORDS_PER_CHUNK = 100;
+let ttsSpeedRate = 1.0; // x1 | x1.5 | x2
+let ttsUserPaused = false; // tracks intentional user pause vs iOS system pause
+
+// iOS fix: resume playback if audio was paused by the system (not by user)
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && ttsAudio && ttsAudio.paused && !ttsUserPaused && ttsCurrentBtnId) {
+        ttsAudio.play().catch(() => {});
+    }
+});
 
 let ttsAudio = null;
 let ttsCurrentBtnId = null;
@@ -2218,7 +2245,7 @@ async function fetchChunk(words) {
             body: JSON.stringify({
                 input: { ssml },
                 voice: { languageCode: 'he-IL', name: TTS_VOICE },
-                audioConfig: { audioEncoding: 'MP3', speakingRate: 0.9, pitch: -1.0 },
+                audioConfig: { audioEncoding: 'MP3', speakingRate: ttsSpeedRate, pitch: -1.0 },
                 enableTimePointing: ['SSML_MARK']
             })
         }
@@ -2262,6 +2289,7 @@ function startHighlighting(audio, timepoints, globalOffset) {
 async function startFromWordIdx(elId, wordIdx) {
     const myId = ++ttsSessionId; // any older session will bail out on next check
     ttsUserScrolled = false; // reset scroll lock for new session
+    ttsUserPaused = false;   // reset pause flag for new session
 
     // Stop current playback immediately
     clearInterval(ttsHighlightTimer);
@@ -2339,10 +2367,10 @@ async function startFromWordIdx(elId, wordIdx) {
 
 async function speakText(contentElId, btnEl) {
     if (ttsCurrentBtnId === btnEl.id && ttsAudio && !ttsAudio.paused) {
-        ttsAudio.pause(); clearInterval(ttsHighlightTimer); btnEl.innerHTML = '▶ המשך'; updateFloatBar(); return;
+        ttsUserPaused = true; ttsAudio.pause(); clearInterval(ttsHighlightTimer); btnEl.innerHTML = '▶ המשך'; updateFloatBar(); return;
     }
     if (ttsCurrentBtnId === btnEl.id && ttsAudio && ttsAudio.paused) {
-        ttsAudio.play().then(() => { btnEl.innerHTML = '⏸ השהה'; updateFloatBar(); }); return;
+        ttsUserPaused = false; ttsAudio.play().then(() => { btnEl.innerHTML = '⏸ השהה'; updateFloatBar(); }); return;
     }
 
     // Auto-open text panel if not yet loaded
@@ -2395,34 +2423,50 @@ function resetTTSUI() {
 }
 
 const TRACK_NAMES = { parasha: 'פרשת השבוע', mishna: 'משנה יומית', tanakh: 'תנ"ך' };
+const SPEED_LABELS = { 1.0: '×1', 1.5: '×1.5', 2.0: '×2' };
 
-function updateFloatBar(playing) {
+function setTTSSpeed(rate) {
+    ttsSpeedRate = rate;
+    document.querySelectorAll('.tts-speed-btn').forEach(b => {
+        b.classList.toggle('active', parseFloat(b.dataset.rate) === rate);
+    });
+    // Stop and notify user to restart
+    if (ttsAudio && !ttsAudio.paused) {
+        stopTTS();
+        const lbl = document.getElementById('ttsFloatLabel');
+        if (lbl) { lbl.textContent = 'מהירות שונתה — לחץ הקרא מחדש'; setTimeout(() => updateFloatBar(), 2000); }
+    }
+}
+
+function updateFloatBar() {
     const bar = document.getElementById('ttsFloatBar');
     const lbl = document.getElementById('ttsFloatLabel');
+    const sub = document.getElementById('ttsFloatSub');
     const btn = document.getElementById('ttsFloatPlayPause');
     if (!bar) return;
-    if (!ttsCurrentBtnId) {
-        bar.classList.remove('visible'); return;
-    }
+    if (!ttsCurrentBtnId) { bar.classList.remove('visible'); return; }
     bar.classList.add('visible');
     const track = ttsCurrentBtnId.replace('TtsBtn', '');
-    if (lbl) lbl.textContent = '🔊 ' + (TRACK_NAMES[track] || track);
+    if (lbl) lbl.textContent = TRACK_NAMES[track] || track;
+    if (sub) sub.textContent = '🔊 מקריא';
     const isPaused = ttsAudio ? ttsAudio.paused : true;
     if (btn) btn.textContent = isPaused ? '▶' : '⏸';
 }
 
 function floatPlayPause() {
     if (!ttsAudio || !ttsCurrentBtnId) return;
-    const btn = document.getElementById(ttsCurrentBtnId);
+    const mainBtn = document.getElementById(ttsCurrentBtnId);
     if (ttsAudio.paused) {
+        ttsUserPaused = false;
         ttsAudio.play().then(() => {
-            if (btn) btn.innerHTML = '⏸ השהה';
+            if (mainBtn) mainBtn.innerHTML = '⏸ השהה';
             updateFloatBar();
         });
     } else {
+        ttsUserPaused = true;
         ttsAudio.pause();
         clearInterval(ttsHighlightTimer);
-        if (btn) btn.innerHTML = '▶ המשך';
+        if (mainBtn) mainBtn.innerHTML = '▶ המשך';
         updateFloatBar();
     }
 }
@@ -2430,9 +2474,19 @@ function floatPlayPause() {
 
 <!-- Floating TTS mini-player -->
 <div id="ttsFloatBar" class="tts-float-bar">
-    <span id="ttsFloatLabel" class="tts-float-label">🔊 מקריא...</span>
-    <button id="ttsFloatPlayPause" class="tts-float-btn" onclick="floatPlayPause()" title="השהה / המשך">⏸</button>
-    <button class="tts-float-btn tts-float-stop" onclick="stopTTS()" title="עצור">⏹</button>
+    <div class="tts-float-info">
+        <span id="ttsFloatLabel" class="tts-float-label">פרשת השבוע</span>
+        <span id="ttsFloatSub" class="tts-float-sub">🔊 מקריא</span>
+    </div>
+    <div class="tts-float-controls">
+        <div class="tts-speed-group">
+            <button class="tts-speed-btn active" data-rate="1" onclick="setTTSSpeed(1.0)">×1</button>
+            <button class="tts-speed-btn" data-rate="1.5" onclick="setTTSSpeed(1.5)">×1.5</button>
+            <button class="tts-speed-btn" data-rate="2" onclick="setTTSSpeed(2.0)">×2</button>
+        </div>
+        <button id="ttsFloatPlayPause" class="tts-float-btn tts-float-playpause" onclick="floatPlayPause()" title="השהה / המשך">⏸</button>
+        <button class="tts-float-btn tts-float-stop" onclick="stopTTS()" title="עצור">⏹</button>
+    </div>
 </div>
 </body>
 </html>
