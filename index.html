@@ -2203,6 +2203,11 @@ async function fetchChunk(words) {
     return { audioUrl: 'data:audio/mp3;base64,' + data.audioContent, timepoints: data.timepoints || [] };
 }
 
+// Track user scroll — if they scrolled recently, don't hijack the page
+let ttsUserScrolledAt = 0;
+window.addEventListener('scroll', () => { ttsUserScrolledAt = Date.now(); }, { passive: true });
+window.addEventListener('touchmove', () => { ttsUserScrolledAt = Date.now(); }, { passive: true });
+
 function startHighlighting(audio, timepoints, globalOffset) {
     clearInterval(ttsHighlightTimer);
     const markers = timepoints
@@ -2220,7 +2225,13 @@ function startHighlighting(audio, timepoints, globalOffset) {
         if (cur < 0) return;
         container.querySelectorAll('.tts-word.tts-active').forEach(s => s.classList.remove('tts-active'));
         const sp = container.querySelector(`.tts-word[data-idx="${cur}"]`);
-        if (sp) { sp.classList.add('tts-active'); sp.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+        if (sp) {
+            sp.classList.add('tts-active');
+            // Only auto-scroll if user hasn't scrolled in the last 4 seconds
+            if (Date.now() - ttsUserScrolledAt > 4000) {
+                sp.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
     }, 50);
 }
 
