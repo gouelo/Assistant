@@ -919,7 +919,7 @@
         <div class="manitou-eyebrow">שיעור שבועי</div>
         <div class="manitou-title" id="manitouTitle">פרשת <span id="manitouParasha">טוען...</span></div>
         <div class="manitou-author">ע״פ הרב יהודה ליאון אשכנזי ״מניטו״</div>
-        <a id="manitouLink" class="manitou-link" href="#" target="_blank" rel="noopener">
+        <a id="manitouLink" class="manitou-link" href="https://manitou.org.il" target="_blank" rel="noopener">
             📖 לקריאת השיעור המלא
         </a>
     </div>
@@ -1243,7 +1243,6 @@ function render() {
 
         <p class="date-display">${getHebrewDate()}</p>
     `;
-    updateManitouCard();
 }
 
 function updateManitouCard() {
@@ -2031,6 +2030,7 @@ function initParallax() {
 }
 initParallax();
 initLearning(); // learning view is default, so init immediately
+updateManitouCard(); // PARASHA_SCHEDULE is now defined, safe to call
 
 // ── Learning page hero parallax ──
 function initLearnHero() {
