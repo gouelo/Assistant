@@ -586,14 +586,29 @@
             background: linear-gradient(180deg, rgba(12,12,28,0.98) 0%, rgba(8,8,20,0.99) 100%);
             border-top: 1px solid rgba(244,196,48,0.3);
             backdrop-filter: blur(20px);
-            padding: 10px 16px 14px;
-            display: flex; align-items: center; gap: 10px;
+            padding: 0;
+            display: flex; flex-direction: column;
             direction: rtl;
             transform: translateY(100%);
             transition: transform 0.3s cubic-bezier(.4,0,.2,1);
             box-shadow: 0 -8px 32px rgba(0,0,0,0.5);
         }
         .tts-float-bar.visible { transform: translateY(0); }
+        /* Progress bar */
+        .tts-progress-track {
+            width: 100%; height: 3px; background: rgba(244,196,48,0.12);
+            flex-shrink: 0; cursor: pointer; position: relative;
+        }
+        .tts-progress-fill {
+            height: 100%; width: 0%; min-width: 0;
+            background: linear-gradient(90deg, rgba(244,196,48,0.6), #f4c430);
+            transition: width 0.4s linear;
+            border-radius: 0 2px 2px 0;
+        }
+        .tts-float-inner {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 16px 14px;
+        }
         .tts-float-info { flex: 1; min-width: 0; }
         .tts-float-label { display: block; font-size: 13px; color: var(--gold); font-family: 'Frank Ruhl Libre', serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
         .tts-float-sub { display: block; font-size: 10px; color: rgba(244,196,48,0.45); letter-spacing: 1px; margin-top: 1px; }
@@ -617,6 +632,8 @@
         .tts-float-stop { font-size: 13px; opacity: 0.7; }
         .tts-float-stop:hover { opacity: 1; }
         body.light .tts-float-bar { background: linear-gradient(180deg, rgba(250,245,235,0.98) 0%, rgba(245,240,228,0.99) 100%); border-top-color: rgba(139,90,43,0.3); }
+        body.light .tts-progress-track { background: rgba(139,90,43,0.1); }
+        body.light .tts-progress-fill { background: linear-gradient(90deg, rgba(139,90,43,0.5), #b8860b); }
         body.light .tts-float-btn { background: rgba(139,90,43,0.08); border-color: rgba(139,90,43,0.3); color: #7a4f2a; }
         body.light .tts-speed-btn { background: rgba(139,90,43,0.05); border-color: rgba(139,90,43,0.2); color: rgba(139,90,43,0.5); }
         body.light .tts-speed-btn.active, body.light .tts-speed-btn:hover { background: rgba(139,90,43,0.15); border-color: rgba(139,90,43,0.5); color: #7a4f2a; }
@@ -2270,6 +2287,8 @@ let ttsCurrentBtnId = null;
 let ttsContentElId = null;
 let ttsHighlightTimer = null;
 let ttsSessionId = 0; // increments each session — prevents race conditions & double-play
+let ttsProgressTotal = 0; // total words in current TTS session
+let ttsProgressOffset = 0; // words already spoken before current chunk
 
 // ── Word preprocessing ──
 function preprocessWord(w) {
@@ -2390,6 +2409,12 @@ function startHighlighting(audio, timepoints, globalOffset) {
                 sp.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
         }
+        // Update progress bar
+        if (ttsProgressTotal > 0) {
+            const pct = Math.min(100, ((ttsProgressOffset + cur - globalOffset) / ttsProgressTotal) * 100);
+            const fill = document.getElementById('ttsProgressFill');
+            if (fill) fill.style.width = pct + '%';
+        }
     }, 50);
 }
 
@@ -2422,6 +2447,12 @@ async function startFromWordIdx(elId, wordIdx) {
     const words  = allSpans.slice(wordIdx).map(s => s.textContent);
     const chunks = chunkWordArray(words, TTS_WORDS_PER_CHUNK);
     let chunkOffset = 0;
+
+    // Init progress
+    ttsProgressTotal = words.length;
+    ttsProgressOffset = wordIdx;
+    const fillEl = document.getElementById('ttsProgressFill');
+    if (fillEl) { fillEl.style.transition = 'none'; fillEl.style.width = (wordIdx / Math.max(1, allSpans.length) * 100) + '%'; setTimeout(() => { if (fillEl) fillEl.style.transition = 'width 0.4s linear'; }, 50); }
 
     // Pre-fetch first chunk immediately
     let nextChunkPromise = chunks.length > 0 ? fetchChunk(chunks[0]) : null;
@@ -2533,6 +2564,10 @@ function resetTTSUI() {
     });
     ttsCurrentBtnId = null;
     ttsContentElId  = null;
+    ttsProgressTotal = 0;
+    ttsProgressOffset = 0;
+    const fillEl = document.getElementById('ttsProgressFill');
+    if (fillEl) { fillEl.style.transition = 'none'; fillEl.style.width = '0%'; }
     updateFloatBar();
 }
 
@@ -2588,18 +2623,23 @@ function floatPlayPause() {
 
 <!-- Floating TTS mini-player -->
 <div id="ttsFloatBar" class="tts-float-bar">
-    <div class="tts-float-info">
-        <span id="ttsFloatLabel" class="tts-float-label">פרשת השבוע</span>
-        <span id="ttsFloatSub" class="tts-float-sub">🔊 מקריא</span>
+    <div class="tts-progress-track" id="ttsProgressTrack" onclick="ttsSeekClick(event)">
+        <div class="tts-progress-fill" id="ttsProgressFill"></div>
     </div>
-    <div class="tts-float-controls">
-        <div class="tts-speed-group">
-            <button class="tts-speed-btn active" data-rate="1" onclick="setTTSSpeed(1.0)">×1</button>
-            <button class="tts-speed-btn" data-rate="1.5" onclick="setTTSSpeed(1.5)">×1.5</button>
-            <button class="tts-speed-btn" data-rate="2" onclick="setTTSSpeed(2.0)">×2</button>
+    <div class="tts-float-inner">
+        <div class="tts-float-info">
+            <span id="ttsFloatLabel" class="tts-float-label">פרשת השבוע</span>
+            <span id="ttsFloatSub" class="tts-float-sub">🔊 מקריא</span>
         </div>
-        <button id="ttsFloatPlayPause" class="tts-float-btn tts-float-playpause" onclick="floatPlayPause()" title="השהה / המשך">⏸</button>
-        <button class="tts-float-btn tts-float-stop" onclick="stopTTS()" title="עצור">⏹</button>
+        <div class="tts-float-controls">
+            <div class="tts-speed-group">
+                <button class="tts-speed-btn active" data-rate="1" onclick="setTTSSpeed(1.0)">×1</button>
+                <button class="tts-speed-btn" data-rate="1.5" onclick="setTTSSpeed(1.5)">×1.5</button>
+                <button class="tts-speed-btn" data-rate="2" onclick="setTTSSpeed(2.0)">×2</button>
+            </div>
+            <button id="ttsFloatPlayPause" class="tts-float-btn tts-float-playpause" onclick="floatPlayPause()" title="השהה / המשך">⏸</button>
+            <button class="tts-float-btn tts-float-stop" onclick="stopTTS()" title="עצור">⏹</button>
+        </div>
     </div>
 </div>
 </body>
