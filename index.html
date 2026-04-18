@@ -669,12 +669,28 @@
             transition: all 0.2s;
         }
         .manitou-link:hover { background: rgba(244,196,48,0.25); border-color: rgba(244,196,48,0.7); }
+        .manitou-divider { border: none; border-top: 1px solid rgba(244,196,48,0.15); margin: 18px 0; }
+        .manitou-text-body {
+            font-size: clamp(15px,3.2vw,17px); line-height: 1.85;
+            color: var(--text-primary); margin-bottom: 16px;
+        }
+        .manitou-text-para { margin-bottom: 14px; }
+        .manitou-tts-row {
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px;
+        }
+        .manitou-source-link {
+            font-size: 12px; color: rgba(244,196,48,0.45); text-decoration: none;
+            border-bottom: 1px dashed rgba(244,196,48,0.2); transition: color 0.2s;
+        }
+        .manitou-source-link:hover { color: rgba(244,196,48,0.75); }
         body.light .manitou-card { background: linear-gradient(135deg, #fffef9, #fdf8f0); border-color: rgba(139,90,43,0.28); }
         body.light .manitou-card::before { background: radial-gradient(circle, rgba(139,90,43,0.06) 0%, transparent 70%); }
         body.light .manitou-eyebrow { color: rgba(139,90,43,0.5); }
         body.light .manitou-title { color: #7a4f2a; }
         body.light .manitou-author { color: rgba(44,24,16,0.45); }
         body.light .manitou-link { background: rgba(139,90,43,0.1); border-color: rgba(139,90,43,0.4); color: #7a4f2a; }
+        body.light .manitou-divider { border-top-color: rgba(139,90,43,0.15); }
+        body.light .manitou-source-link { color: rgba(139,90,43,0.45); border-bottom-color: rgba(139,90,43,0.2); }
 
         /* ── TTS Word Highlight ── */
         .tts-word {
@@ -919,8 +935,17 @@
         <div class="manitou-eyebrow">שיעור שבועי</div>
         <div class="manitou-title" id="manitouTitle">פרשת <span id="manitouParasha">טוען...</span></div>
         <div class="manitou-author">ע״פ הרב יהודה ליאון אשכנזי ״מניטו״</div>
-        <a id="manitouLink" class="manitou-link" href="https://manitou.org.il" target="_blank" rel="noopener">
-            📖 לקריאת השיעור המלא
+        <div class="manitou-tts-row">
+            <button class="btn-tts" id="manitouTtsBtn" onclick="speakText('manitouTextContent', this)">🔊 הקרא</button>
+            <button class="btn-tts-stop" id="manitouTtsStop" onclick="stopTTS()" style="display:none">⏹ עצור</button>
+            <span class="tts-chunk-progress" id="manitouTtsProgress"></span>
+        </div>
+        <div class="manitou-text-body" id="manitouTextContent">
+            <p class="manitou-text-para" style="color:rgba(244,196,48,0.4);font-size:14px;">טוען שיעור...</p>
+        </div>
+        <hr class="manitou-divider">
+        <a id="manitouLink" class="manitou-source-link" href="https://manitou.org.il" target="_blank" rel="noopener">
+            🔗 מקור: manitou.org.il
         </a>
     </div>
 </div>
@@ -1255,8 +1280,21 @@ function updateManitouCard() {
     }
     const nameEl = document.getElementById('manitouParasha');
     const linkEl = document.getElementById('manitouLink');
+    const textEl = document.getElementById('manitouTextContent');
     if (nameEl) nameEl.textContent = p.name;
     if (linkEl && p.manitouUrl) linkEl.href = p.manitouUrl;
+    if (textEl) {
+        if (p.manitouText && p.manitouText.length) {
+            textEl.innerHTML = p.manitouText
+                .map(t => `<p class="manitou-text-para">${t}</p>`)
+                .join('');
+            // Trigger TTS auto-wrap observer
+            textEl.dataset.ttsWrapped = '';
+            setTimeout(() => wrapWordsForTTS('manitouTextContent'), 100);
+        } else {
+            textEl.innerHTML = '<p class="manitou-text-para" style="color:rgba(244,196,48,0.35);font-size:14px;">השיעור לפרשה זו יתעדכן בקרוב.</p>';
+        }
+    }
 }
 
 // Stars & particles
@@ -1309,7 +1347,7 @@ const PARASHA_SCHEDULE = [
     { name: 'שמיני',          manitouUrl: 'https://manitou.org.il/arcive/pash/vaykrapashak/2588-shminipash',        shabbat: new Date(2026, 3, 11), aliyot: [
         'Leviticus 9:1-9:16','Leviticus 9:17-9:23','Leviticus 9:24-10:11',
         'Leviticus 10:12-10:15','Leviticus 10:16-10:20','Leviticus 11:1-11:32','Leviticus 11:33-11:47'] },
-    { name: 'תזריע-מצורע',    manitouUrl: 'https://manitou.org.il/arcive/pash/vaykrapashak/2609-tazriapash',       shabbat: new Date(2026, 3, 18), aliyot: [
+    { name: 'תזריע-מצורע',    manitouUrl: 'https://manitou.org.il/arcive/pash/vaykrapashak/2609-tazriapash',       shabbat: new Date(2026, 3, 18), manitouText: ["השבת אנו קוראים שתי פרשות, תזריע ומצורע. בפרשות אלה התורה מפרטת את הדינים העוסקים בהבחנה בין מצבים של טהרה ובין מצבים של טומאה, כהמשך למה שכבר נאמר בנושא עד כה בספר ויקרא.","מפרשה לפרשה ניתן לזהות מהלך הדרגתי של הרחבת חוקי הטהרה.","מהתבוננות בתהליך זה עולה נושא חשוב, שהמפרשים הדגישו אותו: ככל שאדם עולה במדרגות הקדושה, כך הוא חשוף יותר לפגיעות מן הטומאה. יש בעניין זה משום תשובה לשאלה מדוע הדינים העוסקים בטומאה, על כל דקדוקיהם ודיוקיהם, מובאים דווקא בספר ויקרא?","ואכן, ניתן לקרוא את ספר ויקרא, המכונה בפי חכמינו 'תורת כהנים', כהזמנה לכל אחד ואחד להגשים את הקדושה בתוכו, בכל רבדי הווייתו. ואם כך, אפשר היה להניח שקריאה זו מיועדת למי שבמדרגתו כבר אינו חשוף למצבי טומאה. אך אנו רואים שהתורה מלמדת אותנו עיקרון הפוך: לא רק שמי שעלה במעלות הקדושה חשוף יותר לפגיעות הטומאה, אלא שדווקא אצלו הטומאה מתגלה יותר, יוצאת מן הכוח אל הפועל.","הטומאה מתגלה דווקא במהלך המאמץ להתעלות אל הקדושה. זאת משום שמהותו של מאמץ זה היא בירור: 'להוציא החוצה' את החלק המת הטמון בבסיס הקיום של כל חי עלי אדמות.","משום כך, דיני הטומאה לא נאמרו לפני 'ההזמנה אל הקדושה', אלא דווקא בגוף הזמנה זו.","עצם השם 'מצורע' מצביע על כך: המצורע הוא 'מוציא רע', וכפי שמסביר ה'גלילי זהב', בהתבסס על דברי ריש לקיש בגמרא – הוא מוציא את הרע שבו."], aliyot: [
         'Leviticus 12:1-13:23','Leviticus 13:24-13:39','Leviticus 13:40-13:54',
         'Leviticus 13:55-14:20','Leviticus 14:21-14:32','Leviticus 14:33-15:15','Leviticus 15:16-15:33'] },
     { name: 'אחרי מות-קדושים',manitouUrl: 'https://manitou.org.il/arcive/pash/vaykrapashak/3020-achreimot',         shabbat: new Date(2026, 3, 25), aliyot: [
@@ -2287,7 +2325,7 @@ function wrapWordsForTTS(elId) {
 }
 
 // Auto-wrap when Sefaria loads text
-['parashaTextContent','mishnaTextContent','tanakhTextContent'].forEach(elId => {
+['parashaTextContent','mishnaTextContent','tanakhTextContent','manitouTextContent'].forEach(elId => {
     const obs = new MutationObserver(() => {
         const el = document.getElementById(elId);
         if (!el || el.dataset.ttsWrapped === '1') return;
@@ -2485,7 +2523,7 @@ function stopTTS(reset = true) {
 function resetTTSUI() {
     clearInterval(ttsHighlightTimer);
     document.querySelectorAll('.tts-word.tts-active').forEach(s => s.classList.remove('tts-active'));
-    ['parasha', 'mishna', 'tanakh'].forEach(t => {
+    ['parasha', 'mishna', 'tanakh', 'manitou'].forEach(t => {
         const btn  = document.getElementById(t + 'TtsBtn');
         const stop = document.getElementById(t + 'TtsStop');
         const prog = document.getElementById(t + 'TtsProgress');
@@ -2498,7 +2536,7 @@ function resetTTSUI() {
     updateFloatBar();
 }
 
-const TRACK_NAMES = { parasha: 'פרשת השבוע', mishna: 'משנה יומית', tanakh: 'תנ"ך' };
+const TRACK_NAMES = { parasha: 'פרשת השבוע', mishna: 'משנה יומית', tanakh: 'תנ"ך', manitou: 'שיעור מניטו' };
 const SPEED_LABELS = { 1.0: '×1', 1.5: '×1.5', 2.0: '×2' };
 
 function setTTSSpeed(rate) {
