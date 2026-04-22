@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>לימוד יומי יואל</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
-    <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700;900&family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #0a0a1a;
@@ -44,7 +44,7 @@
             --track-top-line: rgba(244,196,48,0.5);
         }
         body.light {
-            --bg: #F2EBE0;
+            --bg: #EDE5D6;
             --card-bg: linear-gradient(135deg, #FFFFFF 0%, #FDFAF6 100%);
             --text-primary: #1A0E04;
             --text-secondary: rgba(26,14,4,0.62);
@@ -184,14 +184,20 @@
         .card {
             background: var(--card-bg);
             border: 1px solid var(--border);
-            border-radius: 24px;
+            border-radius: 28px;
             padding: 44px 38px;
             text-align: center;
             box-shadow: var(--card-shadow);
             animation: cardFloat 6s ease-in-out infinite;
             position: relative;
             overflow: hidden;
-            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+            backdrop-filter: blur(12px);
+        }
+        .card:hover { transform: translateY(-3px); }
+        body.light .card {
+            background: rgba(255,255,255,0.85);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 12px 40px rgba(0,0,0,0.07), 0 0 0 1px rgba(122,88,16,0.08);
         }
         .card::before { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--card-top-line),transparent); }
         @keyframes cardFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
@@ -268,7 +274,7 @@
         }
         .nav-btn {
             background: none; border: none; cursor: pointer;
-            font-family: 'Frank Ruhl Libre', serif;
+            font-family: 'Heebo', sans-serif;
             font-size: 15px; font-weight: 600;
             color: var(--nav-btn-color);
             padding: 0 28px; height: 100%;
@@ -304,6 +310,10 @@
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpolygon points='60,18 70,38 92,38 75,51 82,72 60,59 38,72 45,51 28,38 50,38' fill='none' stroke='rgba(244%2C196%2C48%2C0.025)' stroke-width='1'/%3E%3C/svg%3E");
             background-size: 120px 120px;
             pointer-events: none; z-index: 0;
+        }
+        @keyframes gradientDrift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
         body.light::after {
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpolygon points='60,18 70,38 92,38 75,51 82,72 60,59 38,72 45,51 28,38 50,38' fill='none' stroke='rgba(139%2C90%2C43%2C0.03)' stroke-width='1'/%3E%3C/svg%3E");
@@ -714,11 +724,18 @@
         .manitou-card {
             background: linear-gradient(135deg, rgba(20,15,45,0.97) 0%, rgba(12,10,30,0.99) 100%);
             border: 1px solid rgba(244,196,48,0.28);
-            border-radius: 18px;
-            padding: 24px 22px;
+            border-radius: 28px;
+            padding: 28px 26px;
             margin-top: 20px;
             position: relative;
             overflow: hidden;
+            backdrop-filter: blur(16px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .manitou-card:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(0,0,0,0.3), 0 0 0 1px rgba(244,196,48,0.25); }
+        body.light .manitou-card {
+            background: linear-gradient(135deg, rgba(26,14,4,0.94) 0%, rgba(18,10,2,0.96) 100%);
+            border-color: rgba(244,196,48,0.3);
         }
         .manitou-card::before {
             content: '';
@@ -763,12 +780,13 @@
             border-bottom: 1px dashed rgba(244,196,48,0.2); transition: color 0.2s;
         }
         .manitou-source-link:hover { color: rgba(244,196,48,0.75); }
-        body.light .manitou-card { background: linear-gradient(135deg, #fffef9, #fdf8f0); border-color: rgba(139,90,43,0.28); }
-        body.light .manitou-card::before { background: radial-gradient(circle, rgba(139,90,43,0.06) 0%, transparent 70%); }
-        body.light .manitou-eyebrow { color: rgba(139,90,43,0.5); }
-        body.light .manitou-title { color: #7a4f2a; }
-        body.light .manitou-author { color: rgba(44,24,16,0.45); }
-        body.light .manitou-link { background: rgba(139,90,43,0.1); border-color: rgba(139,90,43,0.4); color: #7a4f2a; }
+        body.light .manitou-card::before { background: radial-gradient(circle, rgba(244,196,48,0.06) 0%, transparent 70%); }
+        body.light .manitou-eyebrow { color: rgba(244,196,48,0.55); }
+        body.light .manitou-title { color: #f4c430; }
+        body.light .manitou-author { color: rgba(255,255,255,0.45); }
+        body.light .manitou-link { background: rgba(244,196,48,0.15); border-color: rgba(244,196,48,0.4); color: #f4c430; }
+        body.light .manitou-text-body { color: rgba(255,255,255,0.88); }
+        body.light .manitou-source-link { color: rgba(244,196,48,0.5); border-bottom-color: rgba(244,196,48,0.25); }
         body.light .manitou-divider { border-top-color: rgba(139,90,43,0.15); }
         body.light .manitou-source-link { color: rgba(139,90,43,0.45); border-bottom-color: rgba(139,90,43,0.2); }
 
@@ -790,11 +808,122 @@
             color: var(--text-secondary); line-height: 1.8;
             transition: color 0.3s;
         }
+        .footer-candle { margin-left: 6px; font-size: 16px; }
         .footer-divider {
             width: 40px; height: 1px;
             background: linear-gradient(90deg,transparent,var(--gold-dim),transparent);
             margin: 16px auto;
         }
+
+        /* ── Scroll entrance animation ── */
+        .reveal {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.65s cubic-bezier(.16,1,.3,1), transform 0.65s cubic-bezier(.16,1,.3,1);
+        }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.2s; }
+
+        /* ── Portal section cards ── */
+        .portal-section {
+            border-radius: 28px;
+            margin-top: 20px;
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            backdrop-filter: blur(16px);
+        }
+        .portal-section:hover { transform: translateY(-2px); }
+        .portal-section-dark {
+            background: linear-gradient(135deg, rgba(16,10,2,0.95) 0%, rgba(24,16,4,0.97) 100%);
+            border: 1px solid rgba(244,196,48,0.2);
+        }
+        body.light .portal-section-dark {
+            background: linear-gradient(135deg, rgba(18,12,2,0.95) 0%, rgba(26,16,4,0.97) 100%);
+            border-color: rgba(244,196,48,0.25);
+        }
+        .portal-section-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 22px 24px; cursor: pointer; user-select: none;
+            gap: 12px;
+        }
+        .portal-section-header:hover .portal-section-chevron { opacity: 1; }
+        .portal-section-icon { font-size: 26px; flex-shrink: 0; }
+        .portal-section-info { flex: 1; }
+        .portal-section-eyebrow {
+            font-size: 10px; letter-spacing: 3.5px; text-transform: uppercase;
+            color: rgba(244,196,48,0.5); margin-bottom: 4px;
+            font-family: 'Heebo', sans-serif;
+        }
+        .portal-section-title {
+            font-size: clamp(17px,3.8vw,21px); font-weight: 700;
+            color: var(--gold); line-height: 1.3;
+        }
+        body.light .portal-section-dark .portal-section-title { color: #f4c430; }
+        body.light .portal-section-dark .portal-section-eyebrow { color: rgba(244,196,48,0.55); }
+        .portal-section-chevron {
+            font-size: 18px; color: rgba(244,196,48,0.5); transition: transform 0.3s ease, opacity 0.2s;
+            flex-shrink: 0; opacity: 0.7;
+        }
+        .portal-section.open .portal-section-chevron { transform: rotate(180deg); }
+        .portal-section-body {
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(.16,1,.3,1);
+            padding: 0 24px;
+        }
+        .portal-section.open .portal-section-body { max-height: 4000px; padding-bottom: 22px; }
+        .portal-section-divider {
+            border: none; border-top: 1px solid rgba(244,196,48,0.1);
+            margin: 0 24px;
+        }
+        /* Principles list */
+        .principle-item {
+            display: flex; gap: 14px; align-items: flex-start;
+            padding: 13px 0; border-bottom: 1px solid rgba(244,196,48,0.07);
+        }
+        .principle-item:last-child { border-bottom: none; }
+        .principle-num {
+            flex-shrink: 0; width: 26px; height: 26px;
+            background: rgba(244,196,48,0.12); border: 1px solid rgba(244,196,48,0.25);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 700; color: var(--gold); font-family: 'Heebo', sans-serif;
+        }
+        body.light .portal-section-dark .principle-num { color: #f4c430; }
+        .principle-text {
+            font-size: clamp(14px,3vw,16px); color: rgba(255,255,255,0.85);
+            line-height: 1.75; direction: rtl;
+        }
+        .principle-bold { font-weight: 700; color: var(--gold); }
+        body.light .portal-section-dark .principle-bold { color: #f4c430; }
+        /* Remembrances */
+        .zechira-item {
+            padding: 12px 0; border-bottom: 1px solid rgba(244,196,48,0.07);
+            display: flex; gap: 12px; align-items: flex-start;
+        }
+        .zechira-item:last-child { border-bottom: none; }
+        .zechira-num {
+            flex-shrink: 0; font-size: 11px; font-weight: 700;
+            color: rgba(244,196,48,0.5); width: 20px; padding-top: 3px;
+            font-family: 'Heebo', sans-serif;
+        }
+        .zechira-content { flex: 1; }
+        .zechira-title {
+            font-size: clamp(15px,3.2vw,17px); font-weight: 700;
+            color: rgba(255,255,255,0.9); margin-bottom: 3px;
+        }
+        .zechira-pasuk {
+            font-size: clamp(13px,2.5vw,14px); color: rgba(244,196,48,0.65);
+            font-style: italic; line-height: 1.6;
+        }
+        /* Ramban letter */
+        .ramban-text {
+            font-size: clamp(15px,3.2vw,17px); line-height: 1.95;
+            color: rgba(255,255,255,0.85); direction: rtl;
+        }
+        .ramban-text p { margin-bottom: 16px; }
+        .ramban-text p:last-child { margin-bottom: 0; }
+        .ramban-text em { color: rgba(244,196,48,0.8); font-style: normal; font-weight: 600; }
 
         /* ── TTS Word Highlight ── */
         .tts-word {
@@ -1044,7 +1173,7 @@
 </section>
 
 <div class="container">
-    <div class="manitou-card" id="manitouCard">
+    <div class="manitou-card reveal" id="manitouCard">
         <div class="manitou-eyebrow">שיעור שבועי</div>
         <div class="manitou-title" id="manitouTitle">פרשת <span id="manitouParasha">טוען...</span></div>
         <div class="manitou-author">ע״פ הרב יהודה ליאון אשכנזי ״מניטו״</div>
@@ -1061,9 +1190,86 @@
             🔗 מקור: manitou.org.il
         </a>
     </div>
-    <div class="card">
+    <div class="card reveal reveal-delay-1">
         <div id="content"><p style="color:#f4c430;font-size:18px;">טוען...</p></div>
     </div>
+
+    <!-- ── 13 Principles ── -->
+    <div class="portal-section portal-section-dark reveal reveal-delay-1">
+        <div class="portal-section-header" onclick="togglePortalSection(this)">
+            <div class="portal-section-icon">✡️</div>
+            <div class="portal-section-info">
+                <div class="portal-section-eyebrow">רמב״ם · יסודי האמונה</div>
+                <div class="portal-section-title">שלושה עשר עיקרים</div>
+            </div>
+            <div class="portal-section-chevron">▾</div>
+        </div>
+        <hr class="portal-section-divider">
+        <div class="portal-section-body">
+            <div class="principle-item"><div class="principle-num">א</div><div class="principle-text"><span class="principle-bold">מציאות הבורא</span> — אני מאמין באמונה שלמה שהבורא יתברך שמו הוא בורא ומנהיג לכל הברואים, והוא לבדו עשה ועושה ויעשה לכל המעשים.</div></div>
+            <div class="principle-item"><div class="principle-num">ב</div><div class="principle-text"><span class="principle-bold">יחוד ה׳</span> — אני מאמין באמונה שלמה שהבורא יתברך שמו הוא יחיד, ואין יחידות כמוהו בשום פנים, והוא לבדו אלהינו היה הווה ויהיה.</div></div>
+            <div class="principle-item"><div class="principle-num">ג</div><div class="principle-text"><span class="principle-bold">שלילת הגשמות</span> — אני מאמין באמונה שלמה שהבורא יתברך שמו אינו גוף, ולא ישיגוהו משיגי הגוף, ואין לו שום דמיון כלל.</div></div>
+            <div class="principle-item"><div class="principle-num">ד</div><div class="principle-text"><span class="principle-bold">קדמות ה׳</span> — אני מאמין באמונה שלמה שהבורא יתברך שמו הוא ראשון והוא אחרון.</div></div>
+            <div class="principle-item"><div class="principle-num">ה</div><div class="principle-text"><span class="principle-bold">עבודת ה׳ לבדו</span> — אני מאמין באמונה שלמה שהבורא יתברך שמו לבדו ראוי להתפלל, ואין ראוי להתפלל לזולתו.</div></div>
+            <div class="principle-item"><div class="principle-num">ו</div><div class="principle-text"><span class="principle-bold">נבואה</span> — אני מאמין באמונה שלמה שכל דברי הנביאים אמת.</div></div>
+            <div class="principle-item"><div class="principle-num">ז</div><div class="principle-text"><span class="principle-bold">נבואת משה רבינו</span> — אני מאמין באמונה שלמה שנבואת משה רבינו עליו השלום היתה אמתית, ושהוא היה אב לנביאים, לקודמים לפניו ולבאים אחריו.</div></div>
+            <div class="principle-item"><div class="principle-num">ח</div><div class="principle-text"><span class="principle-bold">תורה מן השמים</span> — אני מאמין באמונה שלמה שכל התורה המצויה עתה בידינו היא הנתונה למשה רבינו עליו השלום.</div></div>
+            <div class="principle-item"><div class="principle-num">ט</div><div class="principle-text"><span class="principle-bold">נצחיות התורה</span> — אני מאמין באמונה שלמה שהתורה הזאת לא תהא מוחלפת, ולא תהא תורה אחרת מאת הבורא יתברך שמו.</div></div>
+            <div class="principle-item"><div class="principle-num">י</div><div class="principle-text"><span class="principle-bold">השגחת ה׳</span> — אני מאמין באמונה שלמה שהבורא יתברך שמו יודע כל מעשה בני אדם וכל מחשבותם.</div></div>
+            <div class="principle-item"><div class="principle-num">יא</div><div class="principle-text"><span class="principle-bold">גמול ועונש</span> — אני מאמין באמונה שלמה שהבורא יתברך שמו גומל טוב לשומרי מצוותיו, ומעניש לעוברי מצוותיו.</div></div>
+            <div class="principle-item"><div class="principle-num">יב</div><div class="principle-text"><span class="principle-bold">ביאת המשיח</span> — אני מאמין באמונה שלמה בביאת המשיח, ואף על פי שיתמהמה, עם כל זה אחכה לו בכל יום שיבוא.</div></div>
+            <div class="principle-item"><div class="principle-num">יג</div><div class="principle-text"><span class="principle-bold">תחיית המתים</span> — אני מאמין באמונה שלמה שתהיה תחיית המתים בעת שיעלה רצון מאת הבורא יתברך שמו ויתרומם זכרו לעד ולנצח נצחים.</div></div>
+        </div>
+    </div>
+
+    <!-- ── 10 Remembrances ── -->
+    <div class="portal-section portal-section-dark reveal reveal-delay-2">
+        <div class="portal-section-header" onclick="togglePortalSection(this)">
+            <div class="portal-section-icon">🧠</div>
+            <div class="portal-section-info">
+                <div class="portal-section-eyebrow">מצוות עשה · כל יום</div>
+                <div class="portal-section-title">עשר זכירות</div>
+            </div>
+            <div class="portal-section-chevron">▾</div>
+        </div>
+        <hr class="portal-section-divider">
+        <div class="portal-section-body">
+            <div class="zechira-item"><div class="zechira-num">א</div><div class="zechira-content"><div class="zechira-title">יציאת מצרים</div><div class="zechira-pasuk">לְמַעַן תִּזְכֹּר אֶת יוֹם צֵאתְךָ מֵאֶרֶץ מִצְרַיִם כֹּל יְמֵי חַיֶּיךָ (דברים טז, ג)</div></div></div>
+            <div class="zechira-item"><div class="zechira-num">ב</div><div class="zechira-content"><div class="zechira-title">מעמד הר סיני</div><div class="zechira-pasuk">רַק הִשָּׁמֶר לְךָ וּשְׁמֹר נַפְשְׁךָ מְאֹד פֶּן תִּשְׁכַּח אֶת הַדְּבָרִים אֲשֶׁר רָאוּ עֵינֶיךָ (דברים ד, ט)</div></div></div>
+            <div class="zechira-item"><div class="zechira-num">ג</div><div class="zechira-content"><div class="zechira-title">מה שעשה ה׳ למרים</div><div class="zechira-pasuk">זְכֹר אֵת אֲשֶׁר עָשָׂה ה׳ אֱלֹהֶיךָ לְמִרְיָם (דברים כד, ט)</div></div></div>
+            <div class="zechira-item"><div class="zechira-num">ד</div><div class="zechira-content"><div class="zechira-title">מה שעשה עמלק</div><div class="zechira-pasuk">זָכוֹר אֵת אֲשֶׁר עָשָׂה לְךָ עֲמָלֵק (דברים כה, יז)</div></div></div>
+            <div class="zechira-item"><div class="zechira-num">ה</div><div class="zechira-content"><div class="zechira-title">שבת קודש</div><div class="zechira-pasuk">זָכוֹר אֶת יוֹם הַשַּׁבָּת לְקַדְּשׁוֹ (שמות כ, ח)</div></div></div>
+            <div class="zechira-item"><div class="zechira-num">ו</div><div class="zechira-content"><div class="zechira-title">חטא העגל</div><div class="zechira-pasuk">זְכֹר אַל תִּשְׁכַּח אֵת אֲשֶׁר הִקְצַפְתָּ אֶת ה׳ אֱלֹהֶיךָ (דברים ט, ז)</div></div></div>
+            <div class="zechira-item"><div class="zechira-num">ז</div><div class="zechira-content"><div class="zechira-title">מחיית עמלק</div><div class="zechira-pasuk">תִּמְחֶה אֶת זֵכֶר עֲמָלֵק לֹא תִּשְׁכָּח (דברים כה, יט)</div></div></div>
+            <div class="zechira-item"><div class="zechira-num">ח</div><div class="zechira-content"><div class="zechira-title">בניין בית המקדש</div><div class="zechira-pasuk">וְדָרַשְׁתָּ אֶל שִׁכְנוֹ וּבָאתָ שָׁמָּה (דברים יב, ה)</div></div></div>
+            <div class="zechira-item"><div class="zechira-num">ט</div><div class="zechira-content"><div class="zechira-title">ירושלים</div><div class="zechira-pasuk">אִם אֶשְׁכָּחֵךְ יְרוּשָׁלַיִם תִּשְׁכַּח יְמִינִי (תהילים קלז, ה)</div></div></div>
+            <div class="zechira-item"><div class="zechira-num">י</div><div class="zechira-content"><div class="zechira-title">יום המוות</div><div class="zechira-pasuk">כִּי לֹא יֵדַע הָאָדָם אֶת עִתּוֹ (קהלת ט, יב) — שיהיו ימי חייך שלמים בתשובה</div></div></div>
+        </div>
+    </div>
+
+    <!-- ── Ramban's Letter ── -->
+    <div class="portal-section portal-section-dark reveal reveal-delay-2">
+        <div class="portal-section-header" onclick="togglePortalSection(this)">
+            <div class="portal-section-icon">📜</div>
+            <div class="portal-section-info">
+                <div class="portal-section-eyebrow">הרמב״ן · מכתב לבנו</div>
+                <div class="portal-section-title">אגרת הרמב״ן</div>
+            </div>
+            <div class="portal-section-chevron">▾</div>
+        </div>
+        <hr class="portal-section-divider">
+        <div class="portal-section-body">
+            <div class="ramban-text">
+                <p><em>שְׁמַע בְּנִי</em> מוּסַר אָבִיךָ וְאַל תִּטֹּשׁ תּוֹרַת אִמֶּךָ. הִתְבּוֹנֵן וּרְאֵה מִי נִבְרָא לְשָׁרֵת מִי — כִּי הָאָדָם נִבְרָא לַעֲבֹד אֶת קוֹנוֹ.</p>
+                <p>לְפִיכָךְ, <em>הִרְגֵּל עַצְמְךָ תָּמִיד לְדַבֵּר כָּל דְּבָרֶיךָ בְּנַחַת לְכָל אָדָם וּבְכָל עֵת</em>, וּבַזֶּה תִּנָּצֵל מִן הַכַּעַס שֶׁהוּא מִדָּה רָעָה מְאֹד — עַד שֶׁגָּרְמָה לְחוֹטְאִים לַחֲטֹא. וְתִמְצָא שְׁכִינָה שׁוֹרָה עָלֶיךָ, שֶׁנֶּאֱמַר: "עַל מִי יַשְׁקִיף כִּי אִם אֶל עָנִי וְנְכֵה רוּחַ".</p>
+                <p>וְכַאֲשֶׁר תִּנָּצֵל מִן הַכַּעַס תַּעֲלֶה עַל לִבְּךָ מִדַּת הָעֲנָוָה שֶׁהִיא מִדָּה טוֹבָה מִכָּל הַמִּדּוֹת, שֶׁנֶּאֱמַר: "עֵקֶב עֲנָוָה יִרְאַת ה׳". <em>הַכֵּר מְקוֹמְךָ וְאַל תִּשְׁכַּח אֶת בּוֹרְאֶךָ.</em></p>
+                <p>וּמֵחֲמַת זֶה, בְּכָל אֲשֶׁר תַּעֲשֶׂה, <em>תֶּחֱשֹׁב מַה זֶּה הַמַּעֲשֶׂה אֲשֶׁר אַתָּה עוֹשֶׂה</em> — אִם טוֹב הוּא לְפָנֵי הַמָּקוֹם בָּרוּךְ הוּא, עֲשֵׂהוּ, וְאִם לָאו — אַל תַּעֲשֵׂהוּ.</p>
+                <p>וּבְכָל יוֹם וָיוֹם יִהְיֶה בְּעֵינֶיךָ כְּאִלּוּ עוֹמֵד לִפְנֵי הַשְּׁכִינָה. <em>וּבְשׁוּבְךָ מִן הַדֶּרֶךְ, עַיֵּן בַּסֵּפֶר הַזֶּה וְתֵדַע מַה לַּעֲשׂוֹת.</em></p>
+                <p style="color:rgba(244,196,48,0.5);font-size:13px;margin-top:18px;">— נאחז״ו, כתב הרמב״ן לבנו הגדול בהיותו בגרונה</p>
+            </div>
+        </div>
+    </div>
+
 </div>
 </div><!-- end #omerView -->
 <script>
@@ -2183,6 +2389,21 @@ function initParallax() {
     }, { passive: true });
 }
 initParallax();
+// ── Scroll reveal animation ──
+function initScrollReveal() {
+    const obs = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+}
+setTimeout(initScrollReveal, 200);
+
+// ── Portal section toggle ──
+function togglePortalSection(el) {
+    const section = el.closest('.portal-section');
+    section.classList.toggle('open');
+}
+
 initLearning(); // learning view is default, so init immediately
 updateManitouCard(); // PARASHA_SCHEDULE is now defined, safe to call
 updateHero(); // populate hero with dynamic parasha + omer info
@@ -2768,8 +2989,8 @@ function floatPlayPause() {
 <footer class="site-footer">
     <div class="footer-divider"></div>
     <p class="footer-memorial">לעילוי נשמת</p>
-    <p class="footer-name">ניסים חיים בן סול ז״ל</p>
-    <p class="footer-name">קרם מרים בת יוראל ז״ל</p>
+    <p class="footer-name"><span class="footer-candle">🕯️</span> נסים חיים בן סול ז״ל</p>
+    <p class="footer-name"><span class="footer-candle">🕯️</span> קרן מרים בת יוראל ז״ל</p>
 </footer>
 
 </body>
