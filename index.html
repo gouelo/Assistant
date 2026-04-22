@@ -44,40 +44,40 @@
             --track-top-line: rgba(244,196,48,0.5);
         }
         body.light {
-            --bg: #f5f0e8;
-            --card-bg: linear-gradient(135deg, #fffef9 0%, #fdf8f0 100%);
-            --text-primary: #2c1810;
-            --text-secondary: rgba(44,24,16,0.65);
-            --text-muted: rgba(44,24,16,0.35);
-            --gold: #b8860b;
-            --gold-dim: rgba(139,90,43,0.7);
-            --gold-faint: rgba(139,90,43,0.08);
-            --gold-faintest: rgba(139,90,43,0.04);
-            --border: rgba(139,90,43,0.25);
-            --border-light: rgba(139,90,43,0.15);
-            --border-xlight: rgba(139,90,43,0.12);
-            --nav-bg: rgba(255,250,240,0.97);
-            --nav-border: rgba(139,90,43,0.15);
-            --section-bg: rgba(139,90,43,0.04);
-            --section-border: rgba(139,90,43,0.12);
-            --track-bg: linear-gradient(135deg, #fffef9 0%, #fdf8f0 100%);
-            --track-border: rgba(139,90,43,0.2);
-            --track-border-hover: rgba(139,90,43,0.4);
-            --track-glow-hover: rgba(139,90,43,0.06);
-            --text-panel-bg: rgba(139,90,43,0.04);
-            --text-panel-border: rgba(139,90,43,0.12);
-            --progress-bg: rgba(44,24,16,0.08);
-            --nav-btn-color: rgba(92,61,46,0.7);
-            --nav-btn-hover: rgba(92,61,46,0.95);
-            --nav-sep: rgba(139,90,43,0.2);
-            --hero-eyebrow: rgba(92,61,46,0.7);
-            --hero-sub: rgba(92,61,46,0.6);
-            --scroll-hint: rgba(92,61,46,0.45);
-            --spinner-bg: rgba(139,90,43,0.15);
-            --card-glow: rgba(139,90,43,0.08);
-            --card-shadow: 0 0 40px rgba(139,90,43,0.08), 0 20px 40px rgba(0,0,0,0.08);
-            --card-top-line: rgba(139,90,43,0.4);
-            --track-top-line: rgba(139,90,43,0.35);
+            --bg: #F2EBE0;
+            --card-bg: linear-gradient(135deg, #FFFFFF 0%, #FDFAF6 100%);
+            --text-primary: #1A0E04;
+            --text-secondary: rgba(26,14,4,0.62);
+            --text-muted: rgba(26,14,4,0.35);
+            --gold: #7A5810;
+            --gold-dim: rgba(122,88,16,0.72);
+            --gold-faint: rgba(122,88,16,0.09);
+            --gold-faintest: rgba(122,88,16,0.04);
+            --border: rgba(122,88,16,0.2);
+            --border-light: rgba(122,88,16,0.13);
+            --border-xlight: rgba(122,88,16,0.09);
+            --nav-bg: rgba(250,246,239,0.96);
+            --nav-border: rgba(122,88,16,0.12);
+            --section-bg: rgba(122,88,16,0.04);
+            --section-border: rgba(122,88,16,0.11);
+            --track-bg: linear-gradient(135deg, #FFFFFF 0%, #FDFAF6 100%);
+            --track-border: rgba(122,88,16,0.18);
+            --track-border-hover: rgba(122,88,16,0.38);
+            --track-glow-hover: rgba(122,88,16,0.05);
+            --text-panel-bg: rgba(122,88,16,0.04);
+            --text-panel-border: rgba(122,88,16,0.1);
+            --progress-bg: rgba(26,14,4,0.07);
+            --nav-btn-color: rgba(26,14,4,0.55);
+            --nav-btn-hover: rgba(26,14,4,0.9);
+            --nav-sep: rgba(122,88,16,0.18);
+            --hero-eyebrow: rgba(255,255,255,0.7);
+            --hero-sub: rgba(255,255,255,0.55);
+            --scroll-hint: rgba(255,255,255,0.45);
+            --spinner-bg: rgba(122,88,16,0.12);
+            --card-glow: rgba(122,88,16,0.06);
+            --card-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.06), 0 0 0 1px rgba(122,88,16,0.1);
+            --card-top-line: rgba(122,88,16,0.35);
+            --track-top-line: rgba(122,88,16,0.3);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -102,22 +102,84 @@
         body.light .moon { opacity: 0; pointer-events: none; }
         @keyframes moonGlow { 0%,100%{box-shadow:0 0 40px 15px rgba(244,196,48,0.3),0 0 80px 30px rgba(244,196,48,0.1)} 50%{box-shadow:0 0 60px 25px rgba(244,196,48,0.5),0 0 100px 50px rgba(244,196,48,0.2)} }
 
-        .container { position:relative;z-index:10;width:100%;max-width:700px;padding:20px;margin:0 auto;padding-bottom:60px; }
+        .container { position:relative;z-index:10;width:100%;max-width:700px;padding:20px;margin:0 auto;padding-bottom:20px; }
 
         /* ── Hero / Parallax ── */
-        .hero { height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden; }
+        .hero {
+            height: 100vh; min-height: 600px;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            position: relative; overflow: hidden;
+            background: linear-gradient(160deg, #100A02 0%, #1E1005 35%, #2C1808 65%, #160C03 100%);
+        }
+        /* Radial glow behind hero text */
+        .hero::after {
+            content: ''; position: absolute;
+            top: 50%; left: 50%; transform: translate(-50%, -55%);
+            width: 60vw; height: 60vw; max-width: 600px; max-height: 600px;
+            background: radial-gradient(ellipse, rgba(244,196,48,0.12) 0%, transparent 70%);
+            pointer-events: none; z-index: 1;
+        }
         .para-layer { position:absolute;top:0;left:0;width:100%;height:130%;pointer-events:none;will-change:transform; }
-        .hero-content { text-align:center;z-index:10;position:relative;padding:20px;will-change:transform,opacity; }
-        .hero-eyebrow { font-size:13px;letter-spacing:6px;color:var(--hero-eyebrow);text-transform:uppercase;margin-bottom:20px;animation:hFadeDown 1s ease both;transition:color 0.3s ease; }
-        .hero-big { font-size:clamp(64px,15vw,140px);font-weight:900;line-height:0.95;background:linear-gradient(180deg,#fffde7 0%,#f4c430 55%,#c8860a 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:hAppear 1.2s ease both 0.15s;filter:drop-shadow(0 0 50px rgba(244,196,48,0.35)); }
-        body.light .hero-big { background:linear-gradient(180deg,#5c3d2e 0%,#b8860b 55%,#8b5a2b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
-        .hero-line { width:70px;height:1px;background:linear-gradient(90deg,transparent,var(--gold-dim),transparent);margin:22px auto;transition:background 0.3s ease; }
-        .hero-sub { font-size:clamp(13px,2.5vw,17px);color:var(--hero-sub);letter-spacing:5px;animation:hFadeDown 1s ease both 0.4s;transition:color 0.3s ease; }
-        @keyframes hAppear { from{opacity:0;transform:scale(0.88) translateY(-24px)} to{opacity:1;transform:scale(1) translateY(0)} }
-        @keyframes hFadeDown { from{opacity:0;transform:translateY(-14px)} to{opacity:1;transform:translateY(0)} }
-        .scroll-hint { position:absolute;bottom:36px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--scroll-hint);font-size:11px;letter-spacing:3px;text-transform:uppercase;animation:shBounce 2.5s ease-in-out infinite;transition:color 0.3s ease; }
-        .scroll-hint-arrow { width:16px;height:16px;border-right:2px solid var(--scroll-hint);border-bottom:2px solid var(--scroll-hint);transform:rotate(45deg);transition:border-color 0.3s ease; }
-        @keyframes shBounce { 0%,100%{transform:translateX(-50%) translateY(0);opacity:0.4} 50%{transform:translateX(-50%) translateY(10px);opacity:0.85} }
+        .hero-content { text-align:center;z-index:10;position:relative;padding:20px 28px;will-change:transform,opacity; }
+        /* Eyebrow row */
+        .hero-eyebrow {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            font-size: 11px; letter-spacing: 5px;
+            color: rgba(244,196,48,0.55); text-transform: uppercase;
+            margin-bottom: 24px; animation: hFadeDown 0.9s ease both;
+        }
+        .hero-eyebrow-dot { opacity: 0.4; font-size: 14px; }
+        /* Small label above parasha name */
+        .hero-parasha-tag {
+            font-size: 12px; letter-spacing: 4px; text-transform: uppercase;
+            color: rgba(244,196,48,0.45); margin-bottom: 10px;
+            animation: hFadeDown 1s ease both 0.1s;
+        }
+        /* Big parasha name */
+        .hero-big {
+            font-size: clamp(52px, 13vw, 120px); font-weight: 900; line-height: 1;
+            background: linear-gradient(170deg, #fffde7 0%, #f4c430 45%, #c8860a 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: hAppear 1.2s ease both 0.2s;
+            filter: drop-shadow(0 0 40px rgba(244,196,48,0.25));
+            margin-bottom: 6px;
+        }
+        .hero-line { width: 60px; height: 1px; background: linear-gradient(90deg,transparent,rgba(244,196,48,0.5),transparent); margin: 22px auto; }
+        /* Omer info row */
+        .hero-omer-row {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            animation: hFadeDown 1s ease both 0.45s;
+        }
+        .hero-omer-day {
+            font-size: clamp(15px,3vw,20px); font-weight: 600;
+            color: rgba(255,255,255,0.88); letter-spacing: 1px;
+        }
+        .hero-omer-sefirah {
+            font-size: clamp(12px,2vw,14px); color: rgba(244,196,48,0.6);
+            letter-spacing: 2px;
+        }
+        /* CTA buttons in hero */
+        .hero-cta-row {
+            display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+            margin-top: 32px; animation: hFadeDown 1s ease both 0.6s;
+        }
+        .hero-cta-btn {
+            background: rgba(244,196,48,0.12); border: 1px solid rgba(244,196,48,0.35);
+            color: rgba(244,196,48,0.9); padding: 10px 22px; border-radius: 50px;
+            font-size: 14px; font-family: 'Frank Ruhl Libre', serif;
+            cursor: pointer; transition: all 0.2s; font-weight: 600;
+            backdrop-filter: blur(8px); letter-spacing: 0.5px;
+        }
+        .hero-cta-btn:hover { background: rgba(244,196,48,0.22); border-color: rgba(244,196,48,0.7); color: #f4c430; }
+        .hero-cta-secondary { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.7); }
+        .hero-cta-secondary:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.9); }
+        @keyframes hAppear { from{opacity:0;transform:scale(0.9) translateY(-20px)} to{opacity:1;transform:scale(1) translateY(0)} }
+        @keyframes hFadeDown { from{opacity:0;transform:translateY(-12px)} to{opacity:1;transform:translateY(0)} }
+        .scroll-hint { position:absolute;bottom:32px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:rgba(244,196,48,0.35);font-size:10px;letter-spacing:4px;text-transform:uppercase;animation:shBounce 2.5s ease-in-out infinite; }
+        .scroll-hint-arrow { width:14px;height:14px;border-right:1.5px solid rgba(244,196,48,0.35);border-bottom:1.5px solid rgba(244,196,48,0.35);transform:rotate(45deg); }
+        @keyframes shBounce { 0%,100%{transform:translateX(-50%) translateY(0);opacity:0.35} 50%{transform:translateX(-50%) translateY(8px);opacity:0.75} }
 
         .card {
             background: var(--card-bg);
@@ -198,37 +260,38 @@
             position: fixed; top: 0; right: 0; left: 0; z-index: 1000;
             background: var(--nav-bg);
             border-bottom: 1px solid var(--nav-border);
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(20px) saturate(1.4);
+            -webkit-backdrop-filter: blur(20px) saturate(1.4);
             display: flex; align-items: center; justify-content: center;
-            height: 54px; gap: 0;
+            height: 56px; gap: 0;
             transition: background 0.3s ease, border-color 0.3s ease;
         }
         .nav-btn {
             background: none; border: none; cursor: pointer;
             font-family: 'Frank Ruhl Libre', serif;
-            font-size: 15px; font-weight: 500;
+            font-size: 15px; font-weight: 600;
             color: var(--nav-btn-color);
             padding: 0 28px; height: 100%;
             border-bottom: 2px solid transparent;
-            transition: color 0.25s, border-color 0.25s;
-            letter-spacing: 0.5px;
+            transition: color 0.2s, border-color 0.2s;
+            letter-spacing: 0.3px;
             display: flex; align-items: center; gap: 7px;
         }
         .nav-btn:hover { color: var(--nav-btn-hover); }
         .nav-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
-        .nav-sep { width: 1px; height: 22px; background: var(--nav-sep); transition: background 0.3s ease; }
+        .nav-sep { width: 1px; height: 20px; background: var(--nav-sep); transition: background 0.3s ease; }
 
         /* ── Theme Toggle Button ── */
         .theme-toggle {
-            position: absolute; left: 16px;
-            background: none; border: 1px solid var(--border);
-            border-radius: 20px; padding: 5px 12px;
-            cursor: pointer; font-size: 16px;
-            color: var(--gold); transition: all 0.3s ease;
+            position: absolute; left: 14px;
+            background: var(--gold-faintest); border: 1px solid var(--border-light);
+            border-radius: 50px; padding: 6px 13px;
+            cursor: pointer; font-size: 15px;
+            color: var(--gold); transition: all 0.2s ease;
             display: flex; align-items: center; gap: 5px;
             line-height: 1;
         }
-        .theme-toggle:hover { background: var(--gold-faint); border-color: var(--gold); }
+        .theme-toggle:hover { background: var(--gold-faint); border-color: var(--border); }
 
         /* ── Learning View ── */
         #learningView { position: relative; z-index: 10; padding-top: 70px; }
@@ -709,6 +772,30 @@
         body.light .manitou-divider { border-top-color: rgba(139,90,43,0.15); }
         body.light .manitou-source-link { color: rgba(139,90,43,0.45); border-bottom-color: rgba(139,90,43,0.2); }
 
+        /* ── Footer ── */
+        .site-footer {
+            width: 100%; text-align: center;
+            padding: 40px 20px 48px;
+            border-top: 1px solid var(--border-xlight);
+            margin-top: 32px;
+            transition: border-color 0.3s;
+        }
+        .footer-memorial {
+            font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+            color: var(--text-muted); margin-bottom: 14px;
+            transition: color 0.3s;
+        }
+        .footer-name {
+            font-size: clamp(15px,3vw,18px); font-weight: 500;
+            color: var(--text-secondary); line-height: 1.8;
+            transition: color 0.3s;
+        }
+        .footer-divider {
+            width: 40px; height: 1px;
+            background: linear-gradient(90deg,transparent,var(--gold-dim),transparent);
+            margin: 16px auto;
+        }
+
         /* ── TTS Word Highlight ── */
         .tts-word {
             cursor: pointer;
@@ -928,15 +1015,27 @@
 <!-- ═══════════════════ END LEARNING VIEW ═══════════════════ -->
 
 <div id="omerView">
-<!-- Hero parallax -->
+<!-- Hero -->
 <section class="hero" id="hero">
     <div class="para-layer" id="paraDeep"></div>
     <div class="para-layer" id="paraNear"></div>
     <div class="hero-content" id="heroContent">
-        <div class="hero-eyebrow">תשפ״ו · ספירת העומר</div>
-        <div class="hero-big">ספירת<br>העומר</div>
+        <div class="hero-eyebrow">
+            <span>תשפ״ו</span>
+            <span class="hero-eyebrow-dot">·</span>
+            <span>ספירת העומר</span>
+        </div>
+        <div class="hero-parasha-tag">פרשת השבוע</div>
+        <div class="hero-big" id="heroParashaName">פורטל</div>
         <div class="hero-line"></div>
-        <div class="hero-sub">מפסח ועד שבועות</div>
+        <div class="hero-omer-row">
+            <div class="hero-omer-day" id="heroOmerDay"></div>
+            <div class="hero-omer-sefirah" id="heroOmerSefirah"></div>
+        </div>
+        <div class="hero-cta-row">
+            <button class="hero-cta-btn" onclick="document.getElementById('manitouCard').scrollIntoView({behavior:'smooth',block:'start'})">📚 שיעור שבועי</button>
+            <button class="hero-cta-btn hero-cta-secondary" onclick="document.querySelector('.card').scrollIntoView({behavior:'smooth',block:'start'})">🕯️ ספירת העומר</button>
+        </div>
     </div>
     <div class="scroll-hint" id="scrollHint">
         <span>גלול</span>
@@ -945,9 +1044,6 @@
 </section>
 
 <div class="container">
-    <div class="card">
-        <div id="content"><p style="color:#f4c430;font-size:18px;">טוען...</p></div>
-    </div>
     <div class="manitou-card" id="manitouCard">
         <div class="manitou-eyebrow">שיעור שבועי</div>
         <div class="manitou-title" id="manitouTitle">פרשת <span id="manitouParasha">טוען...</span></div>
@@ -964,6 +1060,9 @@
         <a id="manitouLink" class="manitou-source-link" href="https://manitou.org.il" target="_blank" rel="noopener">
             🔗 מקור: manitou.org.il
         </a>
+    </div>
+    <div class="card">
+        <div id="content"><p style="color:#f4c430;font-size:18px;">טוען...</p></div>
     </div>
 </div>
 </div><!-- end #omerView -->
@@ -2086,6 +2185,28 @@ function initParallax() {
 initParallax();
 initLearning(); // learning view is default, so init immediately
 updateManitouCard(); // PARASHA_SCHEDULE is now defined, safe to call
+updateHero(); // populate hero with dynamic parasha + omer info
+
+function updateHero() {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    // Parasha name
+    let p = PARASHA_SCHEDULE[PARASHA_SCHEDULE.length - 1];
+    for (let i = 0; i < PARASHA_SCHEDULE.length; i++) {
+        if (PARASHA_SCHEDULE[i].shabbat >= today) { p = PARASHA_SCHEDULE[i]; break; }
+    }
+    const pEl = document.getElementById('heroParashaName');
+    if (pEl) pEl.textContent = p.name;
+    // Omer day
+    const start = new Date(2026, 3, 2); start.setHours(0,0,0,0);
+    const diff = Math.round((today - start) / 86400000) + 1;
+    const dayEl = document.getElementById('heroOmerDay');
+    const sefEl = document.getElementById('heroOmerSefirah');
+    if (diff >= 1 && diff <= 49) {
+        if (dayEl) dayEl.textContent = 'יום ' + hebrewNumbers[diff] + ' לעומר';
+        if (sefEl) sefEl.textContent = sefirot[diff] || '';
+    }
+}
 
 // ── Learning page hero parallax ──
 function initLearnHero() {
@@ -2263,8 +2384,8 @@ function toggleTheme() {
     localStorage.setItem('colorScheme', next);
     applyTheme(next);
 }
-// Apply saved preference on load
-applyTheme(localStorage.getItem('colorScheme') || 'dark');
+// Apply saved preference on load — default is light
+applyTheme(localStorage.getItem('colorScheme') || 'light');
 
 // ═══════════════════════════════════════════
 // Google Cloud TTS v3 — Robust, no double-play, natural pauses, יהוה fix
@@ -2642,5 +2763,14 @@ function floatPlayPause() {
         </div>
     </div>
 </div>
+
+<!-- Footer -->
+<footer class="site-footer">
+    <div class="footer-divider"></div>
+    <p class="footer-memorial">לעילוי נשמת</p>
+    <p class="footer-name">ניסים חיים בן סול ז״ל</p>
+    <p class="footer-name">קרם מרים בת יוראל ז״ל</p>
+</footer>
+
 </body>
 </html>
