@@ -2671,17 +2671,63 @@ function getHalachaOfDay() {
     return HALACHA_LIST[dayOfYear % HALACHA_LIST.length];
 }
 
-function toggleHalachaContent() {
+let halachaData = null; // cached API response
+
+async function fetchHalachaFromAPI() {
+    try {
+        const res = await fetch('/api/halacha');
+        if (!res.ok) throw new Error('API error ' + res.status);
+        const data = await res.json();
+        halachaData = data;
+        return data;
+    } catch(e) {
+        return null;
+    }
+}
+
+async function toggleHalachaContent() {
     const panel = document.getElementById('halachaTextPanel');
     const btn = document.getElementById('halachaStartBtn');
     if (!halachaShown) {
-        const h = getHalachaOfDay();
+        // Show loading state
+        if (btn) { btn.textContent = '⏳ טוען...'; btn.disabled = true; }
+        if (panel) panel.style.display = 'block';
+
+        let data = halachaData || await fetchHalachaFromAPI();
+
+        if (btn) { btn.textContent = '📕 סגור'; btn.disabled = false; }
+
         const el = document.getElementById('halachaTextContent');
         const titleEl = document.getElementById('halachaPanelTitle');
-        if (titleEl) titleEl.textContent = h.title;
-        if (el) el.innerHTML = h.body;
-        if (panel) panel.style.display = 'block';
-        if (btn) btn.textContent = '📕 סגור';
+        const subtitle = document.getElementById('halachaSubtitle');
+
+        if (data && data.halachot && data.halachot.length > 0) {
+            const h1 = data.halachot[0];
+            const h2 = data.halachot[1];
+            // Update subtitle with the topic info
+            if (subtitle) subtitle.textContent = h1.slug.replace(/-/g, ' · ') + (h2 ? ' + ' + h2.slug.split('-').pop() : '');
+            if (titleEl) titleEl.textContent = h1.title + (h2 ? ' | ' + h2.title : '');
+            // Build combined HTML
+            let html = '';
+            if (h1) {
+                html += `<h4 style="font-size:clamp(15px,3.2vw,17px);font-weight:700;color:var(--accent);margin-bottom:10px;direction:rtl;">${h1.title}</h4>`;
+                html += h1.html;
+                html += `<p style="margin-top:6px;"><a href="${h1.url}" target="_blank" style="font-size:12px;color:var(--text-muted);">פניני הלכה · ${h1.slug} ↗</a></p>`;
+            }
+            if (h2) {
+                html += `<hr style="border:none;border-top:1px solid var(--border-xlight);margin:18px 0;">`;
+                html += `<h4 style="font-size:clamp(15px,3.2vw,17px);font-weight:700;color:var(--accent);margin-bottom:10px;direction:rtl;">${h2.title}</h4>`;
+                html += h2.html;
+                html += `<p style="margin-top:6px;"><a href="${h2.url}" target="_blank" style="font-size:12px;color:var(--text-muted);">פניני הלכה · ${h2.slug} ↗</a></p>`;
+            }
+            if (el) el.innerHTML = html;
+        } else {
+            // Fallback to static content
+            const h = getHalachaOfDay();
+            if (titleEl) titleEl.textContent = h.title;
+            if (el) el.innerHTML = h.body;
+        }
+
         halachaShown = true;
     } else {
         if (panel) panel.style.display = 'none';
