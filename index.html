@@ -193,13 +193,28 @@
         }
         .theme-toggle:hover { background: var(--accent-soft); border-color: var(--border); }
 
+        /* בס״ד + Hebrew date */
+        .nav-meta {
+            display: flex; flex-direction: column; align-items: flex-end;
+            margin-left: 8px; gap: 1px;
+        }
+        .nav-bsd {
+            font-size: 13px; font-weight: 800; color: var(--accent);
+            font-family: 'Frank Ruhl Libre', serif; letter-spacing: 1px;
+            line-height: 1.1;
+        }
+        .nav-hebrew-date {
+            font-size: 10px; color: var(--text-muted); letter-spacing: 0.3px;
+            font-family: 'Frank Ruhl Libre', serif; white-space: nowrap; line-height: 1.1;
+        }
+
         /* ═══ VIEWS ═══ */
         #learningView { position: relative; z-index: 10; padding-top: 72px; }
         #omerView { display: none; padding-top: 56px; }
 
         /* ═══ PORTAL HERO ═══ */
         .hero {
-            height: 100vh; min-height: 600px;
+            height: 65vh; min-height: 500px;
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
             position: relative; overflow: hidden;
@@ -572,6 +587,8 @@
             .track-card { padding: 20px 16px 18px; }
             .btn-primary, .btn-done { font-size: 13px; padding: 9px 15px; }
             .nav-btn { font-size: 14px; padding: 0 18px; }
+            .nav-hebrew-date { display: none; }
+            .nav-bsd { font-size: 11px; }
         }
 
         /* ═══ DESKTOP ═══ */
@@ -656,49 +673,50 @@
             margin-bottom: 12px; flex-wrap: wrap;
         }
         .btn-tts {
-            background: linear-gradient(135deg, rgba(244,196,48,0.12), rgba(200,134,10,0.18));
-            border: 1px solid rgba(244,196,48,0.35);
-            color: #f4c430; font-family: 'Frank Ruhl Libre', serif;
+            background: var(--accent-soft);
+            border: 1px solid var(--border);
+            color: var(--accent); font-family: 'Frank Ruhl Libre', serif;
             font-size: 13px; font-weight: 600;
             padding: 7px 16px; border-radius: 10px; cursor: pointer;
             transition: all 0.2s; display: flex; align-items: center; gap: 6px;
         }
-        .btn-tts:hover { background: rgba(244,196,48,0.22); border-color: rgba(244,196,48,0.6); }
+        .btn-tts:hover { background: var(--accent-soft); border-color: var(--accent); filter: brightness(1.1); }
         .btn-tts:disabled { opacity: 0.55; cursor: default; }
         .btn-tts-stop {
             background: none;
-            border: 1px solid rgba(244,196,48,0.2);
-            color: rgba(244,196,48,0.55); font-family: 'Frank Ruhl Libre', serif;
+            border: 1px solid var(--border-light);
+            color: var(--text-muted); font-family: 'Frank Ruhl Libre', serif;
             font-size: 12px; padding: 7px 12px; border-radius: 10px;
             cursor: pointer; transition: all 0.2s;
         }
-        .btn-tts-stop:hover { border-color: rgba(244,196,48,0.5); color: rgba(244,196,48,0.85); }
+        .btn-tts-stop:hover { border-color: var(--border); color: var(--text-secondary); }
         .tts-chunk-progress {
-            font-size: 11px; color: rgba(244,196,48,0.4); letter-spacing: 1px;
+            font-size: 11px; color: var(--text-muted); letter-spacing: 1px;
         }
 
         /* Floating TTS mini-player */
         .tts-float-bar {
             position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;
-            background: linear-gradient(180deg, rgba(12,12,28,0.98) 0%, rgba(8,8,20,0.99) 100%);
-            border-top: 1px solid rgba(244,196,48,0.3);
+            background: rgba(255,255,255,0.97);
+            border-top: 2px solid var(--accent);
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             padding: 0;
             display: flex; flex-direction: column;
             direction: rtl;
             transform: translateY(100%);
             transition: transform 0.3s cubic-bezier(.4,0,.2,1);
-            box-shadow: 0 -8px 32px rgba(0,0,0,0.5);
+            box-shadow: 0 -4px 24px rgba(124,58,237,0.13), 0 -1px 0 rgba(124,58,237,0.06);
         }
         .tts-float-bar.visible { transform: translateY(0); }
         /* Progress bar */
         .tts-progress-track {
-            width: 100%; height: 3px; background: rgba(244,196,48,0.12);
+            width: 100%; height: 3px; background: var(--accent-soft);
             flex-shrink: 0; cursor: pointer; position: relative;
         }
         .tts-progress-fill {
             height: 100%; width: 0%; min-width: 0;
-            background: linear-gradient(90deg, rgba(244,196,48,0.6), #f4c430);
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
             transition: width 0.4s linear;
             border-radius: 0 2px 2px 0;
         }
@@ -707,13 +725,13 @@
             padding: 10px 16px 14px;
         }
         .tts-float-info { flex: 1; min-width: 0; }
-        .tts-float-label { display: block; font-size: 13px; color: var(--gold); font-family: 'Frank Ruhl Libre', serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
-        .tts-float-sub { display: block; font-size: 10px; color: rgba(244,196,48,0.45); letter-spacing: 1px; margin-top: 1px; }
+        .tts-float-label { display: block; font-size: 13px; color: var(--accent); font-family: 'Frank Ruhl Libre', serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 700; }
+        .tts-float-sub { display: block; font-size: 10px; color: var(--text-muted); letter-spacing: 1px; margin-top: 1px; }
         .tts-float-controls { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
         .tts-speed-group { display: flex; gap: 3px; }
         .tts-speed-btn {
-            background: rgba(244,196,48,0.06); border: 1px solid rgba(244,196,48,0.2);
-            color: rgba(244,196,48,0.55); border-radius: 8px;
+            background: var(--accent-softer); border: 1px solid var(--border-light);
+            color: var(--text-muted); border-radius: 8px;
             padding: 4px 8px; font-size: 11px; font-family: 'Frank Ruhl Libre', serif;
             cursor: pointer; transition: all 0.15s; font-weight: 600; letter-spacing: 0.3px;
         }
@@ -728,7 +746,7 @@
         .tts-float-playpause { background: var(--accent-soft); border-color: rgba(124,58,237,0.4); font-size: 18px; width: 44px; height: 44px; }
         .tts-float-stop { font-size: 13px; opacity: 0.7; }
         .tts-float-stop:hover { opacity: 1; }
-        body.dark .tts-float-bar { background: rgba(10,12,25,0.97); border-top-color: rgba(167,139,250,0.2); box-shadow: 0 -4px 24px rgba(0,0,0,0.4); }
+        body.dark .tts-float-bar { background: rgba(10,12,25,0.97); border-top-color: var(--accent); box-shadow: 0 -4px 24px rgba(0,0,0,0.4); }
         body.dark .tts-progress-track { background: rgba(167,139,250,0.1); }
         body.dark .tts-progress-fill { background: linear-gradient(90deg, #A78BFA, #22D3EE); }
         body.dark .tts-float-btn { background: rgba(167,139,250,0.09); border-color: rgba(167,139,250,0.25); color: #A78BFA; }
@@ -793,7 +811,21 @@
         }
         .footer-memorial { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px; transition: color 0.3s; }
         .footer-name { font-size: clamp(15px,3vw,18px); font-weight: 500; color: var(--text-secondary); line-height: 1.8; transition: color 0.3s; }
-        .footer-candle { margin-left: 6px; font-size: 16px; }
+        .footer-candle {
+            margin-left: 6px; font-size: 20px; display: inline-block;
+            animation: candleFlicker 2.4s ease-in-out infinite;
+            transform-origin: center bottom;
+        }
+        @keyframes candleFlicker {
+            0%   { transform: rotate(-1deg) scaleY(1);     filter: brightness(1)    drop-shadow(0 0 4px rgba(255,180,50,0.6)); }
+            14%  { transform: rotate(1.8deg) scaleY(1.05); filter: brightness(1.2)  drop-shadow(0 0 9px rgba(255,155,20,0.9)); }
+            28%  { transform: rotate(-0.5deg) scaleY(0.97);filter: brightness(0.93) drop-shadow(0 0 3px rgba(255,130,0,0.5)); }
+            42%  { transform: rotate(2.2deg) scaleY(1.06); filter: brightness(1.25) drop-shadow(0 0 11px rgba(255,200,60,1)); }
+            57%  { transform: rotate(-1.2deg) scaleY(1.02);filter: brightness(1.05) drop-shadow(0 0 5px rgba(255,165,30,0.7)); }
+            71%  { transform: rotate(0.6deg) scaleY(0.98); filter: brightness(0.9)  drop-shadow(0 0 3px rgba(255,120,0,0.45)); }
+            85%  { transform: rotate(-1.6deg) scaleY(1.03);filter: brightness(1.1)  drop-shadow(0 0 7px rgba(255,175,50,0.8)); }
+            100% { transform: rotate(-1deg) scaleY(1);     filter: brightness(1)    drop-shadow(0 0 4px rgba(255,180,50,0.6)); }
+        }
         .footer-divider { width: 40px; height: 1px; background: linear-gradient(90deg,transparent,var(--accent),transparent); margin: 16px auto; opacity: 0.3; }
 
         /* ── Scroll reveal ── */
@@ -913,6 +945,10 @@
         <span>📖</span> הלימוד שלי
     </button>
     <div style="flex:1"></div>
+    <div class="nav-meta">
+        <span class="nav-bsd">בס״ד</span>
+        <span class="nav-hebrew-date" id="navHebrewDate"></span>
+    </div>
     <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="החלף מצב תצוגה">
         <span id="themeIcon">☀️</span>
     </button>
@@ -1069,6 +1105,43 @@
             <div class="aramaic-meaning" id="aramaicMeaning"></div>
             <div class="aramaic-example" id="aramaicExample"></div>
             <div class="aramaic-day-count" id="aramaicDayCount"></div>
+        </div>
+
+        <!-- Halacha Yomit — פניני הלכה -->
+        <div class="track-card" id="halachaCard" style="grid-column: 1 / -1;">
+            <div class="track-watermark">ה</div>
+            <div class="track-header">
+                <div class="track-icon">⚖️</div>
+                <div class="track-info">
+                    <div class="track-eyebrow">הלכה יומית</div>
+                    <div class="track-title">פניני הלכה</div>
+                    <div class="track-subtitle" id="halachaSubtitle">~דקה קריאה</div>
+                </div>
+            </div>
+            <div class="progress-wrap">
+                <div class="progress-bar-bg"><div class="progress-bar-fill" id="halachaProgressBar" style="width:0%"></div></div>
+            </div>
+            <div class="track-actions">
+                <button class="btn-primary" id="halachaStartBtn" onclick="toggleHalachaContent()">📖 פתח הלכה יומית</button>
+                <button class="btn-done" id="halachaDoneBtn" onclick="markHalachaDone()">✓ סיימתי</button>
+            </div>
+            <div class="text-panel" id="halachaTextPanel" style="display:none;">
+                <div class="font-size-controls">
+                    <span>גודל טקסט</span>
+                    <button class="btn-font" onclick="changeFontSize(-1)">−</button>
+                    <button class="btn-font" onclick="changeFontSize(1)">+</button>
+                </div>
+                <div class="tts-controls">
+                    <button class="btn-tts" id="halachaTtsBtn" onclick="speakText('halachaTextContent', this)">🔊 הקרא</button>
+                    <button class="btn-tts-stop" id="halachaTtsStop" onclick="stopTTS()" style="display:none">⏹ עצור</button>
+                    <span class="tts-chunk-progress" id="halachaTtsProgress"></span>
+                </div>
+                <div class="text-panel-title" id="halachaPanelTitle">הלכה יומית</div>
+                <div id="halachaTextContent" style="font-size:17px; line-height:1.9; direction:rtl;"></div>
+                <div style="text-align:center; margin-top:18px;">
+                    <button class="btn-done" onclick="markHalachaDone()">✓ סיימתי</button>
+                </div>
+            </div>
         </div>
 
     </div>
@@ -2558,6 +2631,74 @@ function toggleTheme() {
 // Apply saved preference on load — default is light
 applyTheme(localStorage.getItem('colorScheme') || 'light');
 
+// Hebrew date in nav
+(function() {
+    try {
+        const hd = new Intl.DateTimeFormat('he-u-ca-hebrew', {
+            year: 'numeric', month: 'long', day: 'numeric'
+        }).format(new Date());
+        const el = document.getElementById('navHebrewDate');
+        if (el) el.textContent = hd;
+    } catch(e) {}
+})();
+
+// ═══════════════════════════════════════════
+// Halacha Yomit — פניני הלכה
+const HALACHA_LIST = [
+  { title: 'נטילת ידיים שחרית', body: `<p>מצווה לרחוץ את הידיים בבוקר עם קימה, שלוש פעמים לסירוגין — ימין ושמאל לסירוגין — ולברך "על נטילת ידיים".</p><p>טעם הדבר: הידיים עסקניות הן, וייתכן שנגעו במקומות שאינם טהורים בשעת השינה. עוד טעם: האדם בקומו בבוקר כנברא מחדש הוא, וקדושת היום מתחילה בטהרת הידיים.</p><p>יש להיזהר שלא לגעת בפה, בעיניים, באוזניים ובאף לפני הנטילה. לאחר הנטילה יקנח ידיו ויאמר "אשר יצר" ו"אלהי נשמה".</p>` },
+  { title: 'כיבוד אב ואם', body: `<p>מצוות כיבוד אב ואם היא אחת המצוות החמורות בתורה, ושכרה ארוך ימים בעולם הזה ובעולם הבא. כיבוד אב ואם כולל: לספק להם מזון, לבוש ומחסה לפי יכולתו, לא להכאיבם בדיבור, ולעמוד בפניהם כשנכנסים.</p><p>אפילו אם האב ציוה על בנו לעבור על דברי תורה — לא יעשה, אך יכבד אותו ולא יזלזל בו. גם כיבוד אב ואם לאחר פטירתם מצווה היא — לומר קדיש, לעשות דברים לעילוי נשמתם, וללמוד תורה לזכרם.</p>` },
+  { title: 'מאה ברכות בכל יום', body: `<p>חז"ל תיקנו לומר מאה ברכות בכל יום. מניין זה כולל את ברכות השחר, ברכות קריאת שמע, תפילת שמונה עשרה, ברכות המזון וברכות על מאכלים.</p><p>בשבתות וימים טובים שבהם מתפללים שבע ברכות בעמידה, צריך להשלים מאה ברכות על ידי ברכות פירות, ריח ומאכלים שונים. מאה ברכות — כנגד מאה תקיעות שופר שתיקנו בכל שנה.</p>` },
+  { title: 'שמירת הלשון — דיבור אמת', body: `<p>מצוות "מדבר שקר תרחק" נוהגת בכל עת ובכל מקום. שקר כולל לא רק כזב גמור אלא גם הטעיה בדרך עקלתון, הגזמה שמביאה לרושם שגוי, ושתיקה כשהיה צריך לדבר.</p><p>מותר לשנות מפני השלום — כגון לומר שמאכל היה טעים כשאינו ממש טעים, כדי לא לפגוע במי שבישל. הרגל הדיבור האמת בונה אישיות שלמה, ומי שמדבר אמת — דבריו נשמעים ויש להם כוח.</p>` },
+  { title: 'שמירת שבת — הכנות מערב שבת', body: `<p>מצוות כבוד שבת מתחילה עוד ביום שישי. יש להכין את הבית, לרחוץ ולהתלבש בכבוד, ולהדליק נרות שבת לפני השקיעה.</p><p>הדלקת נרות שבת: מנהג ספרדים להדליק ואחר כך לברך. השעה הנכונה: 18 דקות לפני השקיעה לכתחילה. בלילה יש לקדש על היין, ולאכול לחם משנה — שתי חלות שלמות. שלוש סעודות שבת — מצווה מהתורה.</p>` },
+  { title: 'ברכת הנהנין — ברכה על אוכל', body: `<p>קודם שאוכל אדם יברך על מאכלו. חמש ברכות עיקריות: המוציא לחם (על לחם), מזונות (על מאפים), הגפן (על יין), העץ (על פירות עץ), האדמה (על ירקות).</p><p>ברכה אחרונה: לאחר אכילת לחם — ברכת המזון. לאחר שאר מאכלים — "בורא נפשות" על רוב הדברים, "מעין שלוש" על דגן, יין ופירות שבעת המינים. יש לברך בכוונה — ברכה לבטלה אסורה.</p>` },
+  { title: 'צדקה — כמה וכמתי', body: `<p>מצוות צדקה מן התורה. השיעור הראוי: מעשר (10%) מהכנסתו לעניים וצרכי ציבור. חומש (20%) — מידת חסידות. לכתחילה: קודם לעניי עירו, ואחר כך לשאר. עני קרוב קודם לרחוק.</p><p>מתן בסתר עדיף, כדי לא לבייש את המקבל. אמרו חז"ל: "גדולה צדקה שמקרבת את הגאולה". גם מי שעני — יכול לתת ולקיים מצוות צדקה כפי יכולתו.</p>` },
+  { title: 'תפילה — כוונה ומיקוד', body: `<p>עיקר התפילה — הכוונה. אמרו חז"ל: "תפילה בלא כוונה — כגוף בלא נשמה". לכל הפחות: בברכה ראשונה של שמונה עשרה ("אבות") יכוון שהוא עומד לפני מלך מלכי המלכים.</p><p>אין לעמוד בתפילה אלא מתוך כובד ראש. לפני התפילה — לא ישחק ולא יסיח דעתו בדברי הבל. ירגיש כאילו עומד לפני מלך. נהגו לקבוע מקום קבוע בבית הכנסת.</p>` },
+  { title: 'ביקור חולים', body: `<p>מצוות ביקור חולים מהתורה ומדברי חכמים. מי שביקר חולה — מקל עליו מחוליו. זמן הביקור: לא בשעה ראשונה ולא בשעה אחרונה של היום — בראשונה רגש הוא ולא יתפלל עליו, ובאחרונה נחלש הוא.</p><p>עיקר הביקור — לדאוג לצרכיו, להתפלל עליו ולשמחו. לא יביא חדשות רעות. ישאל "מה תצטרך?" ויפעל ממש.</p>` },
+  { title: 'אהבת ישראל', body: `<p>"ואהבת לרעך כמוך" — הלל הזקן אמר: "זו היא כל התורה כולה". אהבת ישראל כוללת: לשמוח בשמחתו, להצטער בצערו, לדון לכף זכות, לא לדבר עליו לשון הרע.</p><p>אהבת ישראל אינה רק רגש — היא פעולה. כשרואה שחברו צריך עזרה — יעזור. כשמישהו בצרה — יתפלל עליו. רבי עקיבא לימד שאהבת ישראל היא כלל גדול בתורה.</p>` },
+  { title: 'כשרות — הפרדת בשר וחלב', body: `<p>איסור בשר בחלב מהתורה בשלוש לאוין: לא לבשל, לא לאכול, לא ליהנות. לכן מפרידים בין כלי בשר לכלי חלב.</p><p>זמן ההמתנה בין בשר לחלב: מנהג ספרדים — שש שעות לאחר בשר. לאחר גבינה קשה — שש שעות. לאחר חלב נוזלי — מנהג ספרדים: ניקוי הפה, ולכתחילה יש להמתין שעה.</p>` },
+  { title: 'ספירת העומר', body: `<p>מצוות ספירת העומר מהתורה — לספור 49 יום מיום הנפת העומר עד חג השבועות. כל לילה סופרים בברכה, לאחר צאת הכוכבים.</p><p>אם שכח ולא ספר בלילה — יספור ביום בלא ברכה, ויוסיף לספור שאר הלילות בברכה. נהגו לנהוג אבלות בימי הספירה. מנהג ספרדים: אין לישא אישה ולהסתפר מפסח ועד ל"ג בעומר.</p>` },
+  { title: 'גמילות חסדים', body: `<p>גמילות חסדים גדולה מצדקה — שצדקה נעשית בממונו, וגמילות חסדים נעשית בגופו ובממונו. צדקה לעניים בלבד, גמילות חסדים לעשירים ולעניים כאחד.</p><p>דוגמאות: ביקור חולים, הכנסת אורחים, לויית המת, הכנסת כלה, ניחום אבלים. הכנסת אורחים גדולה מקבלת פני השכינה — שאברהם אבינו עזב את השכינה כדי לקבל את האורחים.</p>` },
+  { title: 'ראש השנה — ימי הדין', body: `<p>ראש השנה הוא יום הדין — יום שבו כל באי עולם עוברים לפני ה׳. בראש השנה נכתב בספר החיים, ובעשרת ימי תשובה יש עוד אפשרות לחזור, ובכיפור נחתם הדין.</p><p>מצוות היום: תקיעת שופר — שלושים קולות לפחות, ומאה לכתחילה. מוסיפים בתפילה "מלכויות, זיכרונות, שופרות". אוכלים תפוח בדבש לסימן טוב שנה מתוקה.</p>` },
+  { title: 'שבת — מלאכות האסורות', body: `<p>שלושים ותשע מלאכות אסורות בשבת מהתורה, ונלמדות מהמלאכות שהיו במשכן. מדברי חכמים נוספו "שבות" — דברים שאינם מלאכה אך אסורים לשמירת כבוד השבת.</p><p>מלאכה לצורך פיקוח נפש — מותרת, ואפילו מצווה לעשותה. "וָחַי בָּהֶם — ולא שימות בהם". בספק פיקוח נפש — מחללים שבת, כי חיי אדם קודמים לכל.</p>` }
+];
+
+let halachaShown = false;
+let halachaDone = false;
+
+function getHalachaOfDay() {
+    const d = new Date();
+    const dayOfYear = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000);
+    return HALACHA_LIST[dayOfYear % HALACHA_LIST.length];
+}
+
+function toggleHalachaContent() {
+    const panel = document.getElementById('halachaTextPanel');
+    const btn = document.getElementById('halachaStartBtn');
+    if (!halachaShown) {
+        const h = getHalachaOfDay();
+        const el = document.getElementById('halachaTextContent');
+        const titleEl = document.getElementById('halachaPanelTitle');
+        if (titleEl) titleEl.textContent = h.title;
+        if (el) el.innerHTML = h.body;
+        if (panel) panel.style.display = 'block';
+        if (btn) btn.textContent = '📕 סגור';
+        halachaShown = true;
+    } else {
+        if (panel) panel.style.display = 'none';
+        if (btn) btn.textContent = '📖 פתח הלכה יומית';
+        halachaShown = false;
+    }
+}
+
+function markHalachaDone() {
+    if (halachaDone) return;
+    halachaDone = true;
+    const bar = document.getElementById('halachaProgressBar');
+    const card = document.getElementById('halachaCard');
+    if (bar) bar.style.width = '100%';
+    if (card) { card.style.opacity = '0.72'; card.style.transition = 'opacity 0.4s'; }
+}
+
 // ═══════════════════════════════════════════
 // Google Cloud TTS v3 — Robust, no double-play, natural pauses, יהוה fix
 // ═══════════════════════════════════════════
@@ -2863,7 +3004,7 @@ function resetTTSUI() {
     updateFloatBar();
 }
 
-const TRACK_NAMES = { parasha: 'פרשת השבוע', mishna: 'משנה יומית', tanakh: 'תנ"ך', manitou: 'שיעור מניטו' };
+const TRACK_NAMES = { parasha: 'פרשת השבוע', mishna: 'משנה יומית', tanakh: 'תנ"ך', manitou: 'שיעור מניטו', halacha: 'הלכה יומית — פניני הלכה' };
 const SPEED_LABELS = { 1.0: '×1', 1.5: '×1.5', 2.0: '×2' };
 
 function setTTSSpeed(rate) {
@@ -2871,11 +3012,9 @@ function setTTSSpeed(rate) {
     document.querySelectorAll('.tts-speed-btn').forEach(b => {
         b.classList.toggle('active', parseFloat(b.dataset.rate) === rate);
     });
-    // Stop and notify user to restart
-    if (ttsAudio && !ttsAudio.paused) {
-        stopTTS();
-        const lbl = document.getElementById('ttsFloatLabel');
-        if (lbl) { lbl.textContent = 'מהירות שונתה — לחץ הקרא מחדש'; setTimeout(() => updateFloatBar(), 2000); }
+    // Apply immediately without interrupting playback
+    if (ttsAudio) {
+        ttsAudio.playbackRate = rate;
     }
 }
 
@@ -2939,8 +3078,8 @@ function floatPlayPause() {
 <footer class="site-footer">
     <div class="footer-divider"></div>
     <p class="footer-memorial">לעילוי נשמת</p>
-    <p class="footer-name"><span class="footer-candle">🕯️</span> נסים חיים בן סול ז״ל</p>
-    <p class="footer-name"><span class="footer-candle">🕯️</span> קרן מרים בת יוראל ז״ל</p>
+    <p class="footer-name"><span class="footer-candle" style="animation-delay:0s">🕯️</span> נסים חיים בן סול ז״ל</p>
+    <p class="footer-name"><span class="footer-candle" style="animation-delay:1.3s">🕯️</span> קרן מרים בת יוראל ז״ל</p>
 </footer>
 
 </body>
