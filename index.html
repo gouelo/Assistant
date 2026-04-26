@@ -916,6 +916,79 @@
         body.dark .tts-word:hover { background: rgba(167,139,250,0.14); }
         body.dark .tts-word.tts-active { background: rgba(167,139,250,0.28); color: #EEF2FF; }
 
+        /* ── Temple Banner ── */
+        .temple-banner-wrap {
+            width: 100%;
+            padding-top: 58px; /* nav height */
+            position: relative; z-index: 10;
+        }
+        .temple-banner {
+            position: relative;
+            width: 100%;
+            max-height: 38vh;
+            min-height: 180px;
+            overflow: hidden;
+            line-height: 0;
+        }
+        .temple-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 30%;
+            display: block;
+            max-height: 38vh;
+            min-height: 180px;
+        }
+        .temple-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(
+                to bottom,
+                rgba(244,246,255,0) 0%,
+                rgba(244,246,255,0) 55%,
+                rgba(244,246,255,0.55) 80%,
+                rgba(244,246,255,0.92) 100%
+            );
+            pointer-events: none;
+        }
+        body.dark .temple-overlay {
+            background: linear-gradient(
+                to bottom,
+                rgba(8,11,24,0) 0%,
+                rgba(8,11,24,0) 50%,
+                rgba(8,11,24,0.5) 78%,
+                rgba(8,11,24,0.9) 100%
+            );
+        }
+        .temple-caption {
+            position: absolute;
+            bottom: 12px; left: 0; right: 0;
+            text-align: center;
+            font-family: 'Noto Serif Hebrew', 'Frank Ruhl Libre', serif;
+            font-size: clamp(13px, 2.8vw, 20px);
+            font-weight: 600;
+            color: rgba(255,255,255,0.92);
+            text-shadow: 0 1px 8px rgba(0,0,0,0.55), 0 0 24px rgba(0,0,0,0.3);
+            letter-spacing: 1px;
+            direction: rtl;
+            padding: 0 16px;
+            opacity: 0;
+            animation: templeCaptionFade 1.2s ease 0.4s forwards;
+        }
+        @keyframes templeCaptionFade {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        /* On learningView the padding-top is handled by temple-banner-wrap */
+        #learningView { padding-top: 0 !important; }
+
+        @media(max-width: 480px) {
+            .temple-banner, .temple-img { max-height: 30vw; min-height: 140px; }
+            .temple-caption { font-size: 12px; bottom: 8px; }
+        }
+        @media(min-width: 900px) {
+            .temple-banner, .temple-img { max-height: 32vh; }
+        }
+
         /* ── Font size controls ── */
         .font-size-controls { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; justify-content: flex-end; }
         .font-size-controls span { font-size: 11px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-left: 4px; transition: color 0.3s; }
@@ -956,6 +1029,15 @@
 
 <!-- ═══════════════════ LEARNING VIEW ═══════════════════ -->
 <div id="learningView">
+
+    <!-- Temple Banner -->
+    <div class="temple-banner-wrap">
+        <div class="temple-banner">
+            <img src="temple.jpg" alt="ותחזינה עינינו בשובך לציון" class="temple-img" loading="eager">
+            <div class="temple-overlay"></div>
+            <div class="temple-caption">וְתֶחֱזֶינָה עֵינֵינוּ בְּשׁוּבְךָ לְצִיּוֹן</div>
+        </div>
+    </div>
 
     <!-- Learning hero parallax -->
     <section class="learn-hero" id="learnHero">
