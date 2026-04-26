@@ -408,11 +408,14 @@
         }
         .temple-section img {
             width: 100%;
-            height: clamp(160px, 36vw, 340px);
-            object-fit: cover;
-            object-position: center 22%;
+            height: auto;        /* show full painting at natural ratio */
+            max-height: 60vh;    /* cap on very tall screens */
+            object-fit: contain;
             display: block;
             animation: templeReveal 1.2s ease both;
+        }
+        @media(max-width: 600px) {
+            .temple-section img { max-height: 56vw; object-fit: cover; object-position: center 20%; }
         }
         @keyframes templeReveal {
             from { opacity: 0; transform: scale(1.03); }
